@@ -1,892 +1,124 @@
-<!-- ... existing code ... -->
-                    <div>
-                        <label for="examSelectLogin" class="block text-sm font-bold text-stone-700 mb-1.5">
-                            3. 選擇初始段考成績（登入後可隨意點選切換全部段考） <span class="text-rose-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <select
-                                id="examSelectLogin"
-                                required
-                                onchange="handleExamChangeFromLogin(this.value)"
-                                class="w-full appearance-none rounded-2xl bg-macaron-yellow/40 border-2 border-amber-300 focus:border-macaron-pinkDark focus:bg-white px-4 py-3.5 pr-10 text-base font-bold text-stone-800 outline-none transition"
-                            >
-                                <option value="0">載入考試清單中...</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-amber-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-                            </div>
-                        </div>
-                        <p class="text-xs text-stone-400 mt-1.5">📚 系統已預載全學期歷次段考資料，登入後可直接點選按鈕自由切換，不需重複登入！</p>
-                    </div>
-
-                    <!-- Error message box -->
-<!-- ... existing code ... -->
-                <!-- Top 4 KPI Summary Cards -->
-                <div id="kpiSummaryGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6"></div>
-            </div>
-
-            <!-- One-Click All-Exams Quick Switcher Bar -->
-            <div class="macaron-card rounded-3xl p-5 sm:p-6 border-2 border-amber-200/80">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl">🗂️</span>
-                        <div>
-                            <h3 class="text-base sm:text-lg font-black text-macaron-soil">歷次段考成績隨選切換吧（點選任一次考試立即切換全套分析）</h3>
-                            <p class="text-xs text-stone-500">所有段考資料皆已整合完畢，點選下方任一按鈕即可秒速查看該次段考的組距落點、雷達圖與優勢診斷！</p>
-                        </div>
-                    </div>
-                    <span class="text-xs font-bold px-3 py-1 rounded-full bg-macaron-mint text-emerald-900 border border-emerald-200">
-                        ⚡ 免重覆匯入・一鍵秒切
-                    </span>
-                </div>
-                <div id="examQuickPillsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5"></div>
-            </div>
-
-            <!-- Subject Score Cards Section -->
-<!-- ... existing code ... -->
-                        <tbody id="fullDistributionMatrixBody" class="divide-y divide-stone-100 bg-white"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Cross-Exam Progress Trend & Complete History Comparison Table -->
-            <div class="macaron-card rounded-3xl p-5 sm:p-7 overflow-hidden">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-                    <div>
-                        <h3 class="text-lg sm:text-xl font-black text-macaron-soil">📈 歷次段考成績總覽與學習成長曲線（七年級～九年級全紀錄）</h3>
-                        <p class="text-xs text-stone-500">一次總覽孩子所有段考的五科成績與總平均變化，點擊表格內任一列可直接跳轉至該次段考詳細分析</p>
-                    </div>
-                    <span class="text-xs font-bold px-3 py-1 rounded-full bg-macaron-yellow text-amber-900 border border-amber-200">
-                        💡 點擊表格任一列可切換上方詳細報告
-                    </span>
-                </div>
-
-                <!-- Trend Line Chart -->
-                <div class="relative w-full h-64 sm:h-72 mb-6 bg-amber-50/30 rounded-2xl p-3 border border-amber-100">
-                    <canvas id="historyTrendChartCanvas"></canvas>
-                </div>
-
-                <!-- All Exams Summary Table -->
-                <div class="overflow-x-auto rounded-2xl border border-stone-200">
-                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                        <thead>
-                            <tr id="historyTableHeadRow" class="bg-macaron-lavender/50 text-macaron-soil border-b border-stone-200"></tr>
-                        </thead>
-                        <tbody id="historyTableBody" class="divide-y divide-stone-100 bg-white"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- TEACHER MODAL: ONE-TIME IMPORT & GOOGLE SHEET AUTO MULTI-TAB SYNC -->
-    <div id="sheetModal" class="fixed inset-0 z-50 hidden bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border-2 border-amber-100 p-6 sm:p-8 animate-pop">
-            <div class="flex items-start justify-between gap-4 mb-4">
-                <div>
-                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-macaron-mint text-emerald-900 border border-emerald-200">老師超省心專區・只需設定一次</span>
-                    <h3 class="text-xl sm:text-2xl font-black text-macaron-soil mt-1">🔗 一次匯入／連動全部段考成績設定</h3>
-                    <p class="text-xs sm:text-sm text-stone-500">老師只需要貼上一次試算表網址（或貼上一次總表資料），系統就會自動載入所有段考，家長可隨意切換查詢！</p>
-                </div>
-                <button onclick="closeSheetModal()" class="p-2 rounded-full hover:bg-stone-100 text-stone-500">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-
-            <div class="space-y-6">
-                <!-- Method 1: Single Google Sheet URL Auto-Syncs All Exam Tabs / Master Sheet -->
-                <div class="rounded-2xl bg-amber-50/70 border-2 border-amber-200/80 p-4 sm:p-5">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                        <h4 class="font-black text-macaron-soil text-base">✨ 方式一：只貼一個 Google 試算表網址，自動抓取全部段考（最推薦！）</h4>
-                        <span class="text-xs font-bold text-amber-900 bg-macaron-yellow px-2.5 py-0.5 rounded-full border border-amber-300">只需貼 1 次網址</span>
-                    </div>
-                    <p class="text-xs text-stone-600 mb-3 leading-relaxed">
-                        只要將您的 Google 試算表共用權限設為<b>「知道連結的任何人可檢視」</b>，並把網址貼在下方，系統支援兩種超方便自動讀取模式：<br>
-                        ① <b>同份試算表多個分頁</b>：自動依分頁名稱（如「115學年度 九上第一次段考」或「九上第一次段考」）一次抓齊所有段考！<br>
-                        ② <b>單一總表含「段考/考試名稱」欄位</b>：若您把所有段考放在同一張表，系統也會自動依考試名稱分類好所有段考！
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <input
-                            id="googleSheetUrlInput"
-                            type="url"
-                            placeholder="在此貼上您的 Google 試算表網址（只需貼這一次）..."
-                            class="flex-grow rounded-xl bg-white border-2 border-stone-200 focus:border-macaron-pinkDark px-3.5 py-2.5 text-sm font-medium outline-none"
-                        />
-                        <button onclick="syncAllExamsFromSingleUrl()" class="px-5 py-2.5 rounded-xl bg-macaron-mint hover:brightness-95 text-emerald-900 font-black text-sm border border-emerald-300 shadow-sm shrink-0">
-                            🚀 一鍵同步全部段考資料
-                        </button>
-                    </div>
-                    <div id="sheetConnectStatus" class="hidden mt-3 text-xs font-bold p-3 rounded-xl"></div>
-
-                    <!-- One-Click Copy Full HTML with All Exams Permanently Embedded for GitHub -->
-                    <div class="mt-4 pt-3 border-t border-amber-200/70 flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-xs text-stone-600">💡 同步或匯入完成後，點右方按鈕即可複製<b>「已內建全部 10 次段考完整資料與網址」</b>的程式碼，貼上 GitHub 後永久生效，再也不用重複匯入！</span>
-                        <button onclick="copyFullHtmlWithSheetUrl()" class="px-4 py-2.5 rounded-xl bg-macaron-pink hover:brightness-95 text-rose-900 font-black text-xs sm:text-sm border border-rose-300 shadow-sm">
-                            📋 一鍵複製完整程式碼（已打包全部段考，貼到 GitHub 永久生效）
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Method 2: One-Time Paste (Supports Multi-Exam Master Table or Specific Exam) -->
-                <div class="rounded-2xl bg-stone-50 border border-stone-200 p-4 sm:p-5">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <h4 class="font-black text-macaron-soil text-base">📋 方式二：直接貼上試算表內容（支援「一次貼上歷次段考總表」或「單次段考」）</h4>
-                        <button onclick="fillSampleCsvToTextarea()" class="text-xs font-bold text-sky-700 hover:underline">載入多段考合併範例格式</button>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label class="block text-xs font-bold text-stone-600 mb-1">匯入目標模式：</label>
-                            <select id="modalExamSelector" onchange="handleModalExamSelectChange(this.value)" class="w-full rounded-xl bg-white border-2 border-purple-200 px-3 py-2 text-xs sm:text-sm font-bold text-stone-800 outline-none"></select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-600 mb-1">或新增其他考試項目：</label>
-                            <div class="flex gap-2">
-                                <input id="newExamTitleInput" type="text" placeholder="例如：115學年度 九上第二次段考" class="flex-grow rounded-xl bg-white border-2 border-stone-200 px-3 py-2 text-xs sm:text-sm font-medium outline-none focus:border-purple-400" />
-                                <button type="button" onclick="addNewExamOption()" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shrink-0 transition">＋新增</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p class="text-xs text-stone-500 mb-2">
-                        💡 若您的 Excel／試算表第一欄為<code class="bg-white px-1.5 py-0.5 rounded border">段考名稱</code>（或<code class="bg-white px-1.5 py-0.5 rounded border">考試名稱</code>），直接全選貼上，系統就會<b>一次自動分裝到所有對應的段考</b>，完全不用分次貼！
-                    </p>
-                    <textarea
-                        id="rawCsvTextarea"
-                        rows="5"
-                        placeholder="請從 Excel 或 Google 試算表全選複製（Ctrl+C），直接貼上（Ctrl+V）到這裡..."
-                        class="w-full rounded-xl bg-white border border-stone-300 p-3 text-xs font-mono text-stone-700 outline-none focus:border-macaron-pinkDark"
-                    ></textarea>
-                    <div class="flex justify-end gap-2 mt-3">
-                        <button onclick="importFromTextarea()" class="px-5 py-2 rounded-xl bg-macaron-yellow hover:brightness-95 text-amber-900 font-black text-xs sm:text-sm border border-amber-300 shadow-sm">
-                            ✅ 立即解析並載入成績資料
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-<!-- ... existing code ... -->
-        let currentStudent = null;
-        let selectedDistSubject = "";
-        let radarChartInstance = null;
-        let distChartInstance = null;
-        let historyTrendChartInstance = null;
-
-        // Pre-parsed store for ALL exams so switching between any of the 10 exams is 0ms instant!
-        let examParsedStore = {};
-
-        // Recognized keywords for identifying numeric score columns vs metadata columns
-        const EXCLUDE_FROM_SUBJECTS = [
-            '座號', '學號', '姓名', '學生姓名', '身分證', '身份證', '身分證後五碼', '身份證後五碼',
-            '密碼', '後五碼', '班級', '排名', '班排', '校排', '名次', '總分', '平均', '總平均',
-            '級分', '寫作', '作文', '缺曠', '獎懲', '評語', '備註', '完成率', '目標', '志願',
-            '段考', '考試名稱', '評量名稱', '學期'
-        ];
-
-        function buildGoogleSheetCsvUrl(rawUrl, sheetName = "") {
-            const url = (rawUrl || "").trim();
-            if (!url) return "";
-
-            const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-            if (idMatch && idMatch[1]) {
-                const sheetId = idMatch[1];
-                if (sheetName) {
-                    return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-                }
-                const gidMatch = url.match(/[#&?]gid=([0-9]+)/);
-                const gidParam = gidMatch ? `&gid=${gidMatch[1]}` : "";
-                return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv${gidParam}`;
-            }
-            return url;
-        }
-
-        // Robust CSV / TSV parser supporting quoted fields and newlines inside quotes
-        function parseDelimitedText(text) {
-            const cleanText = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
-            if (!cleanText) return [];
-
-            const firstLine = cleanText.split("\n")[0];
-            const tabCount = (firstLine.match(/\t/g) || []).length;
-            const commaCount = (firstLine.match(/,/g) || []).length;
-            const delimiter = tabCount > commaCount ? "\t" : ",";
-
-            const rows = [];
-            let currentRow = [];
-            let currentVal = "";
-            let inQuotes = false;
-
-            for (let i = 0; i < cleanText.length; i++) {
-                const char = cleanText[i];
-                const nextChar = cleanText[i + 1];
-
-                if (char === '"') {
-                    if (inQuotes && nextChar === '"') {
-                        currentVal += '"';
-                        i++;
-                    } else {
-                        inQuotes = !inQuotes;
-                    }
-                } else if (char === delimiter && !inQuotes) {
-                    currentRow.push(currentVal.trim());
-                    currentVal = "";
-                } else if (char === "\n" && !inQuotes) {
-                    currentRow.push(currentVal.trim());
-                    if (currentRow.some(cell => cell !== "")) {
-                        rows.push(currentRow);
-                    }
-                    currentRow = [];
-                    currentVal = "";
-                } else {
-                    currentVal += char;
-                }
-            }
-            currentRow.push(currentVal.trim());
-            if (currentRow.some(cell => cell !== "")) {
-                rows.push(currentRow);
-            }
-            return rows;
-        }
-
-        function parseRowsToDataset(rows, isLiveSheet = false) {
-            if (!rows || rows.length < 2) return null;
-
-            let headerIdx = 0;
-            for (let i = 0; i < Math.min(rows.length, 5); i++) {
-                if (rows[i].some(cell => cell.includes("姓名") || cell.includes("學生"))) {
-                    headerIdx = i;
-                    break;
-                }
-            }
-
-            const rawHeaders = rows[headerIdx].map((h, idx) => h || `欄位${idx + 1}`);
-            const nameColIdx = rawHeaders.findIndex(h => h.includes("姓名") || h.includes("學生"));
-            const idColIdx = rawHeaders.findIndex(h =>
-                h.includes("後五碼") || h.includes("身分證") || h.includes("身份證") || h.includes("密碼") || h.toLowerCase().includes("id")
-            );
-            const seatColIdx = rawHeaders.findIndex(h => h.includes("座號") || h.includes("編號"));
-            const examColIdx = rawHeaders.findIndex(h => h === "段考" || h === "段考名稱" || h === "考試名稱" || h === "評量名稱");
-
-            if (nameColIdx === -1) return null;
-
-            const nonStudentKeywords = ["平均", "組距", "最高", "最低", "標準差", "人數", "100分", "90-99", "80-89", "70-79", "60-69", "未滿", "不及格", "合計", "總計"];
-            const studentRows = [];
-
-            for (let r = headerIdx + 1; r < rows.length; r++) {
-                const row = rows[r];
-                const studentName = (row[nameColIdx] || "").trim();
-                if (!studentName) continue;
-                if (nonStudentKeywords.some(kw => studentName.includes(kw))) continue;
-                studentRows.push(row);
-            }
-
-            if (studentRows.length === 0) return null;
-
-            const detectedSubjects = [];
-            const detectedMeta = [];
-
-            rawHeaders.forEach((headerName, colIdx) => {
-                if (colIdx === nameColIdx || colIdx === idColIdx || colIdx === examColIdx) return;
-
-                const isExcludedKeyword = EXCLUDE_FROM_SUBJECTS.some(kw => headerName.includes(kw));
-                if (isExcludedKeyword) {
-                    detectedMeta.push({ name: headerName, index: colIdx });
-                    return;
-                }
-
-                let numericCount = 0;
-                let validSampleCount = 0;
-                studentRows.forEach(row => {
-                    const valStr = (row[colIdx] || "").replace(/分/g, "").trim();
-                    if (valStr !== "") {
-                        validSampleCount++;
-                        const num = Number(valStr);
-                        if (!isNaN(num) && num >= 0 && num <= 105) {
-                            numericCount++;
-                        }
-                    }
-                });
-
-                if (validSampleCount > 0 && (numericCount / validSampleCount) >= 0.6) {
-                    detectedSubjects.push({ name: headerName, index: colIdx });
-                } else {
-                    detectedMeta.push({ name: headerName, index: colIdx });
-                }
-            });
-
-            const parsedStudents = studentRows.map((row, idx) => {
-                const name = (row[nameColIdx] || "").trim();
-                const rawId = idColIdx !== -1 ? String(row[idColIdx] || "").trim() : "12345";
-                const idLast5 = rawId.length >= 5 ? rawId.slice(-5) : rawId.padStart(5, "0");
-                const seat = seatColIdx !== -1 && row[seatColIdx] ? String(row[seatColIdx]).trim() : String(idx + 1);
-
-                const scores = {};
-                detectedSubjects.forEach(subj => {
-                    const rawVal = (row[subj.index] || "").replace(/分/g, "").trim();
-                    const num = rawVal !== "" && !isNaN(Number(rawVal)) ? Number(rawVal) : null;
-                    scores[subj.name] = num;
-                });
-
-                const allFields = {};
-                rawHeaders.forEach((h, cIdx) => {
-                    if (cIdx === idColIdx || cIdx === examColIdx) return;
-                    allFields[h] = row[cIdx] !== undefined && row[cIdx] !== "" ? row[cIdx] : "—";
-                });
-
-                return {
-                    seat,
-                    name,
-                    idLast5,
-                    scores,
-                    allFields
-                };
-            });
-
-            return {
-                classStudents: parsedStudents,
-                allHeaders: rawHeaders,
-                scoreSubjectColumns: detectedSubjects,
-                metadataColumns: detectedMeta,
-                isLiveSheet
-            };
-        }
-
-        // Apply a parsed dataset to the active view
-        function applyDatasetToCurrentState(dataset) {
-            if (!dataset) return false;
-            classStudents = dataset.classStudents;
-            allHeaders = dataset.allHeaders;
-            scoreSubjectColumns = dataset.scoreSubjectColumns;
-            metadataColumns = dataset.metadataColumns;
-            if (!selectedDistSubject || !scoreSubjectColumns.some(s => s.name === selectedDistSubject)) {
-                selectedDistSubject = scoreSubjectColumns.length > 0 ? scoreSubjectColumns[0].name : "";
-            }
-            populateLoginDropdown(dataset.isLiveSheet);
-            return true;
-        }
-
-        function processSpreadsheetRows(rows, isLiveSheet = false, targetExamId = null) {
-            const dataset = parseRowsToDataset(rows, isLiveSheet);
-            if (!dataset) {
-                showToast("⚠️ 找不到「姓名」欄位或有效學生資料，請確認試算表格式！");
-                return false;
-            }
-            const examObj = targetExamId
-                ? CONFIG.EXAMS.find(e => e.id === targetExamId)
-                : (CONFIG.EXAMS[currentExamIndex] || CONFIG.EXAMS[0]);
-            if (examObj) {
-                examParsedStore[examObj.id] = dataset;
-            }
-            return applyDatasetToCurrentState(dataset);
-        }
-
-        // Preload all 10 exams into memory immediately so parents can switch with 0 delay
-        function preloadAllExamsIntoMemory() {
-            CONFIG.EXAMS.forEach(exam => {
-                if (!examParsedStore[exam.id]) {
-                    const rawCsv = examCustomCsvCache[exam.id] || DEFAULT_EXAM_DATASETS[exam.id] || DEFAULT_CLASS_901_CSV;
-                    const rows = parseDelimitedText(rawCsv);
-                    const dataset = parseRowsToDataset(rows, Boolean(exam.sheetUrl));
-                    if (dataset) {
-                        examParsedStore[exam.id] = dataset;
-                    }
-                }
-            });
-        }
-<!-- ... existing code ... -->
-        function populateExamSelectors() {
-            const loginExamSelect = document.getElementById("examSelectLogin");
-            const dashExamSelect = document.getElementById("examSelectDashboard");
-            const modalExamSelect = document.getElementById("modalExamSelector");
-
-            const optionsHtml = CONFIG.EXAMS.map((ex, idx) =>
-                `<option value="${idx}" ${idx === currentExamIndex ? "selected" : ""}>📝 ${ex.title}</option>`
-            ).join("");
-
-            if (loginExamSelect) loginExamSelect.innerHTML = optionsHtml;
-            if (dashExamSelect) dashExamSelect.innerHTML = optionsHtml;
-            if (modalExamSelect) {
-                modalExamSelect.innerHTML =
-                    `<option value="ALL_AUTO">🌟 自動依「段考名稱」欄位一次匯入全部段考（推薦）</option>` +
-                    optionsHtml;
-            }
-
-            const activeExam = CONFIG.EXAMS[currentExamIndex] || CONFIG.EXAMS[0];
-            const tagEl = document.getElementById("studentExamTag");
-            if (tagEl && activeExam) {
-                tagEl.textContent = activeExam.title;
-            }
-        }
-
-        async function loadExamByIndex(examIdx) {
-            currentExamIndex = Number(examIdx) || 0;
-            const examObj = CONFIG.EXAMS[currentExamIndex] || CONFIG.EXAMS[0];
-            if (!examObj) return;
-
-            // If this exam has a dedicated live URL and hasn't been fetched as live yet, try fetching
-            const targetUrl = (examObj.sheetUrl && examObj.sheetUrl.trim());
-            if (targetUrl && (!examParsedStore[examObj.id] || !examParsedStore[examObj.id].isLiveSheet)) {
-                await connectGoogleSheetFromInput(targetUrl, true);
-                return;
-            }
-
-            // Instant switch from preloaded memory store
-            if (examParsedStore[examObj.id]) {
-                applyDatasetToCurrentState(examParsedStore[examObj.id]);
-                return;
-            }
-
-            const fallbackCsv = examCustomCsvCache[examObj.id] || DEFAULT_EXAM_DATASETS[exam.id] || DEFAULT_CLASS_901_CSV;
-            const rows = parseDelimitedText(fallbackCsv);
-            processSpreadsheetRows(rows, false, examObj.id);
-        }
-
-        async function handleExamChangeFromLogin(examIdx) {
-            const selectedStudentIdx = document.getElementById("studentSelect").value;
-            const currentPassword = document.getElementById("idLast5Input").value;
-            await loadExamByIndex(Number(examIdx));
-            if (selectedStudentIdx !== "" && document.getElementById("studentSelect").options[Number(selectedStudentIdx) + 1]) {
-                document.getElementById("studentSelect").value = selectedStudentIdx;
-            }
-            document.getElementById("idLast5Input").value = currentPassword;
-        }
-
-        async function handleExamChangeFromDashboard(examIdx) {
-            await loadExamByIndex(Number(examIdx));
-            const activeExam = CONFIG.EXAMS[currentExamIndex];
-            if (activeExam) {
-                showToast(`🌸 已切換至「${activeExam.title}」完整成績與分析！`);
-            }
-        }
-
-        function handleModalExamSelectChange(val) {
-            if (val === "ALL_AUTO") return;
-            currentExamIndex = Number(val) || 0;
-            const examObj = CONFIG.EXAMS[currentExamIndex];
-            if (examObj && examObj.sheetUrl) {
-                document.getElementById("googleSheetUrlInput").value = examObj.sheetUrl;
-            }
-        }
-<!-- ... existing code ... -->
-            renderSubjectScoreCards(student);
-            renderExamQuickSwitcherPills(student);
-            renderRadarChart(student);
-            renderDistributionSection(student, selectedDistSubject || (scoreSubjectColumns[0] && scoreSubjectColumns[0].name));
-            renderStrengthsAndWeaknesses(student);
-            renderAllSpreadsheetFields(student);
-            renderFullDistributionMatrix(student);
-            renderCrossExamHistoryAndTrend(student);
-        }
-
-        function findStudentInDataset(dataset, studentRef) {
-            if (!dataset || !dataset.classStudents) return null;
-            return dataset.classStudents.find(s => s.name === studentRef.name) ||
-                   dataset.classStudents.find(s => s.idLast5 === studentRef.idLast5 && String(s.seat) === String(studentRef.seat));
-        }
-
-        function renderExamQuickSwitcherPills(student) {
-            const container = document.getElementById("examQuickPillsContainer");
-            if (!container) return;
-            container.innerHTML = "";
-
-            CONFIG.EXAMS.forEach((exam, idx) => {
-                const isCurrent = idx === currentExamIndex;
-                const ds = examParsedStore[exam.id];
-                const stInExam = findStudentInDataset(ds, student);
-
-                let avgBadgeText = "點擊查看";
-                if (stInExam && ds && ds.scoreSubjectColumns.length > 0) {
-                    const validCols = ds.scoreSubjectColumns.filter(c => stInExam.scores[c.name] !== null);
-                    if (validCols.length > 0) {
-                        const sum = validCols.reduce((acc, c) => acc + stInExam.scores[c.name], 0);
-                        avgBadgeText = `平均 ${(sum / validCols.length).toFixed(1)} 分`;
-                    }
-                }
-
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.onclick = () => handleExamChangeFromDashboard(idx);
-                btn.className = isCurrent
-                    ? "text-left p-3 rounded-2xl bg-gradient-to-r from-macaron-pink via-macaron-yellow to-macaron-mint border-2 border-rose-400 shadow-md transform -translate-y-0.5 transition flex flex-col justify-between"
-                    : "text-left p-3 rounded-2xl bg-amber-50/60 hover:bg-macaron-yellow/50 border border-stone-200 hover:border-amber-300 transition flex flex-col justify-between";
-
-                btn.innerHTML = `
-                    <div class="flex items-center justify-between gap-1 w-full">
-                        <span class="text-[11px] font-black px-2 py-0.5 rounded-full ${isCurrent ? 'bg-rose-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}">
-                            ${isCurrent ? '★ 目前檢視' : `第 ${CONFIG.EXAMS.length - idx} 次紀錄`}
-                        </span>
-                        <span class="text-[11px] font-black ${isCurrent ? 'text-rose-900' : 'text-emerald-700'}">${avgBadgeText}</span>
-                    </div>
-                    <div class="text-xs sm:text-sm font-black text-macaron-soil mt-1.5 leading-snug">${exam.title}</div>
-                `;
-                container.appendChild(btn);
-            });
-        }
-
-        function renderCrossExamHistoryAndTrend(student) {
-            const headRow = document.getElementById("historyTableHeadRow");
-            const tbody = document.getElementById("historyTableBody");
-            if (!headRow || !tbody) return;
-
-            const subjNames = scoreSubjectColumns.map(s => s.name);
-            headRow.innerHTML = `
-                <th class="py-3 px-3 font-black">歷次段考名稱（點擊可切換）</th>
-                ${subjNames.map(name => `<th class="py-3 px-3 font-black text-center">${name}</th>`).join("")}
-                <th class="py-3 px-3 font-black text-center bg-amber-100/60">個人總分</th>
-                <th class="py-3 px-3 font-black text-center bg-rose-100/60">個人平均</th>
-                <th class="py-3 px-3 font-black text-center">班級平均</th>
-            `;
-
-            tbody.innerHTML = "";
-
-            // Prepare chronological data (oldest to newest) for the line chart
-            const chartLabels = [];
-            const studentAvgSeries = [];
-            const classAvgSeries = [];
-
-            CONFIG.EXAMS.forEach((exam, idx) => {
-                const ds = examParsedStore[exam.id];
-                const stInExam = findStudentInDataset(ds, student);
-                const isCurrent = idx === currentExamIndex;
-
-                let total = 0;
-                let count = 0;
-                let classTotalAvg = 0;
-
-                const subjCellsHtml = subjNames.map(sName => {
-                    const val = stInExam && stInExam.scores[sName] !== undefined ? stInExam.scores[sName] : null;
-                    if (val !== null) {
-                        total += val;
-                        count++;
-                    }
-                    return `<td class="py-3 px-3 text-center font-bold ${val !== null && val >= 90 ? 'text-rose-600 font-black' : 'text-stone-700'}">${val ?? "—"}</td>`;
-                }).join("");
-
-                if (ds && ds.scoreSubjectColumns.length > 0) {
-                    const sumClassAvgs = ds.scoreSubjectColumns.reduce((acc, col) => {
-                        const validVals = ds.classStudents.map(s => s.scores[col.name]).filter(v => v !== null && !isNaN(v));
-                        const cAvg = validVals.length > 0 ? validVals.reduce((a, b) => a + b, 0) / validVals.length : 0;
-                        return acc + cAvg;
-                    }, 0);
-                    classTotalAvg = Number((sumClassAvgs / ds.scoreSubjectColumns.length).toFixed(1));
-                }
-
-                const personalAvg = count > 0 ? Number((total / count).toFixed(1)) : 0;
-
-                // Push in reverse order later for chronological chart
-                chartLabels.unshift(exam.title.replace(/11[3-5]學年度\s*/, ""));
-                studentAvgSeries.unshift(personalAvg);
-                classAvgSeries.unshift(classTotalAvg);
-
-                const tr = document.createElement("tr");
-                tr.onclick = () => handleExamChangeFromDashboard(idx);
-                tr.className = isCurrent
-                    ? "bg-macaron-yellow/50 font-black cursor-pointer transition"
-                    : "hover:bg-amber-50/70 cursor-pointer transition";
-
-                tr.innerHTML = `
-                    <td class="py-3 px-3 font-black text-macaron-soil flex items-center gap-2">
-                        <span class="px-2 py-0.5 rounded-lg text-[11px] ${isCurrent ? 'bg-rose-500 text-white' : 'bg-stone-100 text-stone-600'}">
-                            ${isCurrent ? '目前檢視' : '點選查看'}
-                        </span>
-                        <span>${exam.title}</span>
-                    </td>
-                    ${subjCellsHtml}
-                    <td class="py-3 px-3 text-center font-black text-macaron-soil bg-amber-50/40">${count > 0 ? total : "—"}</td>
-                    <td class="py-3 px-3 text-center font-black text-rose-600 bg-rose-50/40">${count > 0 ? personalAvg : "—"}</td>
-                    <td class="py-3 px-3 text-center font-bold text-stone-500">${classTotalAvg || "—"}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            // Render Line Chart
-            const ctx = document.getElementById("historyTrendChartCanvas").getContext("2d");
-            if (historyTrendChartInstance) historyTrendChartInstance.destroy();
-
-            historyTrendChartInstance = new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels: chartLabels,
-                    datasets: [
-                        {
-                            label: `${student.name} 歷次段考總平均`,
-                            data: studentAvgSeries,
-                            borderColor: "#E86F88",
-                            backgroundColor: "rgba(232, 111, 136, 0.2)",
-                            borderWidth: 3,
-                            pointBackgroundColor: "#BE123C",
-                            pointRadius: 5,
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: "901 班級歷次總平均",
-                            data: classAvgSeries,
-                            borderColor: "#4A89DC",
-                            backgroundColor: "transparent",
-                            borderDash: [5, 5],
-                            borderWidth: 2,
-                            pointBackgroundColor: "#4A89DC",
-                            pointRadius: 4,
-                            tension: 0.3
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            min: 50,
-                            max: 100,
-                            title: { display: true, text: "平均分數 (分)", font: { size: 11, weight: "bold" } }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: "top",
-                            labels: { font: { size: 12, weight: "bold" } }
-                        }
-                    }
-                }
-            });
-        }
-<!-- ... existing code ... -->
-        function openSheetModal() {
-            document.getElementById("sheetModal").classList.remove("hidden");
-            populateExamSelectors();
-            const activeExam = CONFIG.EXAMS[currentExamIndex] || CONFIG.EXAMS[0];
-            document.getElementById("googleSheetUrlInput").value = CONFIG.GOOGLE_SHEET_URL || (activeExam && activeExam.sheetUrl) || "";
-        }
-
-        function closeSheetModal() {
-            document.getElementById("sheetModal").classList.add("hidden");
-        }
-
-        function fillSampleCsvToTextarea() {
-            const sampleLines = [
-                "段考名稱,座號,姓名,身分證後五碼,國文,英語,數學,自然,社會,寫作測驗,平時作業完成率,缺曠紀錄,導師溫暖評語"
-            ];
-            CONFIG.EXAMS.slice(0, 3).forEach(exam => {
-                const raw = DEFAULT_EXAM_DATASETS[exam.id] || DEFAULT_CLASS_901_CSV;
-                const lines = raw.trim().split("\n").slice(1, 4);
-                lines.forEach(l => sampleLines.push(`${exam.title},${l}`));
-            });
-            document.getElementById("rawCsvTextarea").value = sampleLines.join("\n");
-            document.getElementById("modalExamSelector").value = "ALL_AUTO";
-        }
-
-        // Supports importing a single master table containing multiple exams OR a single exam table
-        function importMasterOrSingleRows(rows, isLive = true) {
-            if (!rows || rows.length < 2) return 0;
-
-            const headerRow = rows[0];
-            const examColIdx = headerRow.findIndex(h =>
-                h.includes("段考") || h.includes("考試名稱") || h.includes("評量名稱") || h.includes("學期")
-            );
-
-            // Mode A: Master Sheet with an "考試名稱 / 段考名稱" column -> Automatically split & load ALL exams at once!
-            if (examColIdx !== -1) {
-                const groupedByExamTitle = {};
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    const examTitleRaw = (row[examColIdx] || "").trim();
-                    if (!examTitleRaw) continue;
-                    if (!groupedByExamTitle[examTitleRaw]) {
-                        groupedByExamTitle[examTitleRaw] = [headerRow];
-                    }
-                    groupedByExamTitle[examTitleRaw].push(row);
-                }
-
-                let importedExamCount = 0;
-                Object.entries(groupedByExamTitle).forEach(([examTitle, examRows]) => {
-                    // Match with existing CONFIG.EXAMS or create a new one
-                    let matchedExam = CONFIG.EXAMS.find(e =>
-                        e.title === examTitle || e.title.includes(examTitle) || examTitle.includes(e.title)
-                    );
-                    if (!matchedExam) {
-                        matchedExam = {
-                            id: "exam_auto_" + Date.now() + "_" + importedExamCount,
-                            title: examTitle,
-                            sheetUrl: ""
-                        };
-                        CONFIG.EXAMS.push(matchedExam);
-                    }
-                    const ds = parseRowsToDataset(examRows, isLive);
-                    if (ds) {
-                        examParsedStore[matchedExam.id] = ds;
-                        const csvSerialized = examRows.map(r => r.join(",")).join("\n");
-                        DEFAULT_EXAM_DATASETS[matchedExam.id] = csvSerialized;
-                        examCustomCsvCache[matchedExam.id] = csvSerialized;
-                        importedExamCount++;
-                    }
-                });
-
-                if (importedExamCount > 0) {
-                    populateExamSelectors();
-                    const activeExam = CONFIG.EXAMS[currentExamIndex] || CONFIG.EXAMS[0];
-                    if (examParsedStore[activeExam.id]) {
-                        applyDatasetToCurrentState(examParsedStore[activeExam.id]);
-                    }
-                    return importedExamCount;
-                }
-            }
-
-            // Mode B: Standard Single Exam Table
-            const targetSelectorVal = document.getElementById("modalExamSelector")
-                ? document.getElementById("modalExamSelector").value
-                : String(currentExamIndex);
-            const targetIdx = targetSelectorVal === "ALL_AUTO" ? currentExamIndex : Number(targetSelectorVal);
-            const activeExam = CONFIG.EXAMS[targetIdx] || CONFIG.EXAMS[0];
-            if (activeExam) {
-                const csvSerialized = rows.map(r => r.join(",")).join("\n");
-                DEFAULT_EXAM_DATASETS[activeExam.id] = csvSerialized;
-                examCustomCsvCache[activeExam.id] = csvSerialized;
-                if (processSpreadsheetRows(rows, isLive, activeExam.id)) {
-                    return 1;
-                }
-            }
-            return 0;
-        }
-
-        function importFromTextarea() {
-            const raw = document.getElementById("rawCsvTextarea").value;
-            const rows = parseDelimitedText(raw);
-            const count = importMasterOrSingleRows(rows, true);
-            if (count > 0) {
-                closeSheetModal();
-                showToast(`🎉 匯入成功！已一次更新 ${count} 個段考的完整成績與組距分析！`);
-            } else {
-                showToast("⚠️ 格式無法辨識，請確認包含「姓名」與各科成績欄位喔！");
-            }
-        }
-
-        // One-Click Sync ALL Exams from a single Google Spreadsheet URL!
-        async function syncAllExamsFromSingleUrl(silentMasterUrl = null) {
-            const rawUrl = silentMasterUrl !== null
-                ? silentMasterUrl
-                : document.getElementById("googleSheetUrlInput").value.trim();
-            const statusBox = document.getElementById("sheetConnectStatus");
-
-            if (!rawUrl) {
-                if (!silentMasterUrl && statusBox) {
-                    statusBox.className = "mt-3 text-xs font-bold p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 block";
-                    statusBox.textContent = "請先貼上 Google 試算表網址喔！";
-                }
-                return;
-            }
-
-            if (!silentMasterUrl && statusBox) {
-                statusBox.className = "mt-3 text-xs font-bold p-3 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 block";
-                statusBox.textContent = "⏳ 正在從此試算表自動掃描並同步全部段考分頁與總表資料...";
-            }
-
-            CONFIG.GOOGLE_SHEET_URL = rawUrl;
-            let syncedCount = 0;
-
-            try {
-                // Step 1: Fetch default sheet first (checks if it's a master table with all exams or the first exam)
-                const baseCsvUrl = buildGoogleSheetCsvUrl(rawUrl);
-                const baseResp = await fetch(baseCsvUrl, { cache: "no-store" });
-                if (baseResp.ok) {
-                    const baseCsv = await baseResp.text();
-                    const baseRows = parseDelimitedText(baseCsv);
-                    const countFromBase = importMasterOrSingleRows(baseRows, true);
-                    syncedCount += countFromBase;
-                }
-
-                // Step 2: Concurrently probe worksheet tabs matching each exam title in CONFIG.EXAMS
-                const tabPromises = CONFIG.EXAMS.map(async (exam) => {
-                    const shortTitle = exam.title.replace(/^11[3-5]學年度\s*/, "").trim();
-                    const candidateNames = [exam.title, shortTitle];
-                    for (const tabName of candidateNames) {
-                        try {
-                            const tabCsvUrl = buildGoogleSheetCsvUrl(rawUrl, tabName);
-                            const resp = await fetch(tabCsvUrl, { cache: "no-store" });
-                            if (!resp.ok) continue;
-                            const text = await resp.text();
-                            const rows = parseDelimitedText(text);
-                            const ds = parseRowsToDataset(rows, true);
-                            if (ds && ds.classStudents.length > 0) {
-                                examParsedStore[exam.id] = ds;
-                                DEFAULT_EXAM_DATASETS[exam.id] = text;
-                                exam.sheetUrl = tabCsvUrl;
-                                return true;
-                            }
-                        } catch (_) {
-                            // Ignore individual tab probe failure
-                        }
-                    }
-                    return false;
-                });
-
-                const tabResults = await Promise.all(tabPromises);
-                const tabSuccessCount = tabResults.filter(Boolean).length;
-                if (tabSuccessCount > syncedCount) {
-                    syncedCount = tabSuccessCount;
-                }
-
-                const activeExam = CONFIG.EXAMS[currentExamIndex] || CONFIG.EXAMS[0];
-                if (examParsedStore[activeExam.id]) {
-                    applyDatasetToCurrentState(examParsedStore[activeExam.id]);
-                }
-
-                if (!silentMasterUrl && statusBox) {
-                    if (syncedCount > 0) {
-                        statusBox.className = "mt-3 text-xs font-bold p-3 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 block";
-                        statusBox.innerHTML = `✅ 同步完成！已自動載入 <b>${syncedCount} 個段考資料</b>（全班 ${classStudents.length} 位學生）。現在點下方粉紅色按鈕複製程式碼貼到 GitHub，家長就能永久隨選切換所有段考！`;
-                        showToast(`🎉 已成功從單一網址同步 ${syncedCount} 個段考的資料！`);
-                    } else {
-                        throw new Error("無法讀取試算表內容");
-                    }
-                }
-            } catch (err) {
-                if (!silentMasterUrl && statusBox) {
-                    statusBox.className = "mt-3 text-xs font-bold p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 block";
-                    statusBox.innerHTML = `⚠️ 無法直接讀取此網址。請確認試算表右上角「共用」已設為<b>「知道連結的任何人可檢視」</b>！`;
-                }
-            }
-        }
-
-        async function connectGoogleSheetFromInput(silentUrl = null, isAutoSwitch = false) {
-            await syncAllExamsFromSingleUrl(silentUrl);
-        }
-
-        function copyFullHtmlWithSheetUrl() {
-            const inputUrl = document.getElementById("googleSheetUrlInput").value.trim();
-            if (inputUrl) {
-                CONFIG.GOOGLE_SHEET_URL = inputUrl;
-            }
-            let fullHtml = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-            // Embed updated GOOGLE_SHEET_URL, EXAMS list, and all imported DEFAULT_EXAM_DATASETS permanently!
-            fullHtml = fullHtml.replace(
-                /GOOGLE_SHEET_URL:\s*"[^"]*"/,
-                `GOOGLE_SHEET_URL: "${CONFIG.GOOGLE_SHEET_URL.replace(/"/g, '\\"')}"`
-            );
-            const examsJsonString = JSON.stringify(CONFIG.EXAMS, null, 16);
-            fullHtml = fullHtml.replace(
-                /EXAMS:\s*\[[\s\S]*?\]/,
-                `EXAMS: ${examsJsonString}`
-            );
-            const datasetsJsonString = JSON.stringify(DEFAULT_EXAM_DATASETS, null, 12);
-            fullHtml = fullHtml.replace(
-                /const DEFAULT_EXAM_DATASETS = \{[\s\S]*?\};/,
-                `const DEFAULT_EXAM_DATASETS = ${datasetsJsonString};`
-            );
-            copyTextToClipboard(fullHtml, "🎉 已打包全部段考資料與設定！貼到 GitHub 後家長即可直接切換所有段考，永遠免重複匯入！");
-        }
-<!-- ... existing code ... -->
-        window.onload = async function () {
-            // Preload all 10 exams into memory immediately so switching is 0ms instant
-            preloadAllExamsIntoMemory();
-            // Load the default first exam (115學年度 九上第一次段考)
-            await loadExamByIndex(0);
-            // If teacher configured a master GOOGLE_SHEET_URL, auto-sync all tabs in background
-            if (CONFIG.GOOGLE_SHEET_URL && CONFIG.GOOGLE_SHEET_URL.trim() !== "") {
-                syncAllExamsFromSingleUrl(CONFIG.GOOGLE_SHEET_URL.trim());
-            }
-        };
-    </script>
-</body>
-</html>
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>宜蘭縣文化國中901班學習紀錄小站</title>
+<style>
+:root{--ink:#5b4b5e;--pink:#ffc8dd;--blue:#bde0fe;--green:#cdeac0;--yellow:#fff1a8;--purple:#d9c7f5;--orange:#ffd6a5}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:linear-gradient(160deg,#fff4e6,#f3e8ff 50%,#e3f6ff);min-height:100vh}
+header{text-align:center;padding:22px 12px 8px}
+h1{margin:6px 0;font-size:clamp(20px,5vw,30px)}
+.row{display:flex;justify-content:center;gap:4px}
+main{max-width:860px;margin:auto;padding:12px}
+.card{background:#fff;border-radius:24px;padding:18px;margin:14px 0;box-shadow:0 6px 0 rgba(91,75,94,.08)}
+.card h2{margin:0 0 10px;font-size:18px}
+select,input,button{font:inherit;padding:11px 14px;border-radius:16px;border:2px solid var(--purple);width:100%;margin:6px 0;color:var(--ink);background:#fff}
+button{background:#ff9ebb;border-color:#ff9ebb;color:#fff;font-weight:700;cursor:pointer}
+.login{max-width:380px;margin:auto}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{border-radius:20px;padding:14px;text-align:center}
+.stat b{display:block;font-size:26px}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;text-align:center;font-size:15px}
+th{background:var(--blue)}th,td{padding:8px;border-bottom:2px dashed #f0e6f6;white-space:nowrap}
+td.me{background:var(--yellow);font-weight:700}
+.up{color:#2e9e5b}.down{color:#e0556f}
+.tag{display:inline-block;border-radius:99px;padding:3px 12px;margin:3px;font-size:14px}
+li{margin:6px 0;line-height:1.6}
+.err{color:#e0556f;text-align:center;min-height:1.4em}
+</style></head><body>
+<header><div class="row" id="piks"></div><h1>🌱 宜蘭縣文化國中901班學習紀錄小站 🌸</h1></header>
+<main>
+<section id="login" class="card login">
+  <h2>家長登入</h2>
+  <select id="name"><option>載入學生名單中…</option></select>
+  <input id="pin" type="password" inputmode="numeric" maxlength="5" placeholder="請輸入身分證後五碼">
+  <button onclick="doLogin()">登入</button>
+  <div class="err" id="err"></div>
+</section>
+<section id="app" hidden>
+  <div class="card"><h2 id="hello"></h2>
+    <select id="exam" onchange="render(this.value)"></select>
+    <button onclick="location.reload()" style="background:#b8a1e3;border-color:#b8a1e3">登出</button></div>
+  <div id="out"></div>
+</section>
+</main>
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbyboEMEXTNXMR3anQSqQQTCVGvgXZ6Si7p9kX_glkXFsFdz8M71h-SoI-lBDwnkEP7FMA/exec';
+const $ = s => document.querySelector(s), COL = ['#ff8fab','#8ecae6','#ffd166','#b8a1e3','#95d5b2'];
+const BG = ['var(--pink)','var(--blue)','var(--yellow)','var(--green)'];
+const BINS = ['0–59','60–69','70–79','80–89','90–99','100'];
+let D;
+function pik(c, s = 44) {
+  return `<svg width="${s}" height="${s}" viewBox="0 0 48 48"><path d="M24 13c0-6 3-9 9-9-1 6-4 9-9 9z" fill="#7bc96f"/><path d="M24 13v6" stroke="#6ab04c" stroke-width="3"/><ellipse cx="24" cy="32" rx="13" ry="13" fill="${c}"/><circle cx="19" cy="30" r="3" fill="#333"/><circle cx="29" cy="30" r="3" fill="#333"/><circle cx="19.8" cy="29" r="1" fill="#fff"/><circle cx="29.8" cy="29" r="1" fill="#fff"/></svg>`;
+}
+$('#piks').innerHTML = COL.map(c => pik(c)).join('');
+fetch(API + '?action=list').then(r => r.json()).then(d => {
+  $('#name').innerHTML = '<option value="">請選擇學生姓名</option>' + d.names.map(n => `<option>${n}</option>`).join('');
+}).catch(() => $('#err').textContent = '無法連線，請稍後再試');
+function doLogin() {
+  const n = $('#name').value, p = $('#pin').value;
+  if (!n || p.length < 5) { $('#err').textContent = '請選擇姓名並輸入5碼'; return; }
+  $('#err').textContent = '查詢中…';
+  fetch(`${API}?action=query&name=${encodeURIComponent(n)}&pin=${encodeURIComponent(p)}`).then(r => r.json()).then(d => {
+    if (d.error) { $('#err').textContent = d.error; return; }
+    D = d; $('#login').hidden = true; $('#app').hidden = false;
+    $('#hello').textContent = `${d.name} 同學的學習紀錄`;
+    $('#exam').innerHTML = d.exams.map((e, i) => `<option value="${i}">${e.name}</option>`).join('');
+    render(0);
+  }).catch(() => $('#err').textContent = '連線失敗，請稍後再試');
+}
+const sg = x => (x > 0 ? '+' : '') + x.toFixed(1);
+const cl = x => x > 0 ? 'up' : x < 0 ? 'down' : '';
+function render(i) {
+  i = +i; const e = D.exams[i], p = D.exams[i + 1], S = e.subjects;
+  const stats = [['總分', e.total], ['平均', e.avg], ['班級排名', `${e.rank}/${e.count}`], ['班級平均', e.cAvg]]
+    .map((x, k) => `<div class="stat" style="background:${BG[k]}">${x[0]}<b>${x[1]}</b></div>`).join('');
+  const table = `<div class="wrap"><table><tr><th>科目</th><th>我的分數</th><th>班平均</th><th>最高</th><th>最低</th><th>與平均差</th><th>班排名</th></tr>` +
+    S.map(x => `<tr><td>${x.n}</td><td class="me">${x.s}</td><td>${x.avg}</td><td>${x.max}</td><td>${x.min}</td><td class="${cl(x.s - x.avg)}">${sg(x.s - x.avg)}</td><td>${x.rank}/${x.cnt}</td></tr>`).join('') + '</table></div>';
+  const dist = `<div class="wrap"><table><tr><th>科目</th>${BINS.map(b => `<th>${b}分</th>`).join('')}</tr>` +
+    S.map(x => `<tr><td>${x.n}</td>${x.bins.map((c, k) => `<td ${k === x.bin ? 'class="me"' : ''}>${c}${k === x.bin ? ' 🌱' : ''}</td>`).join('')}</tr>`).join('') +
+    `</table></div><small>數字為全班在該分數區間的人數，🌱為孩子所在位置。</small>`;
+  $('#out').innerHTML =
+    `<div class="card"><div class="stats">${stats}</div></div>` +
+    `<div class="card"><h2>📋 各科成績</h2>${table}</div>` +
+    `<div class="card"><h2>📊 各科組距人數</h2>${dist}</div>` +
+    `<div class="card"><h2>🔍 學習狀況分析</h2>${analysis(e, p)}</div>` +
+    `<div class="card"><h2>📈 歷次平均趨勢</h2>${trend(i)}</div>` +
+    (e.comment ? `<div class="card" style="background:var(--yellow)"><h2>💌 導師的話</h2>${e.comment}</div>` : '');
+}
+function analysis(e, p) {
+  const S = e.subjects.map(x => ({...x, d: x.s - x.avg, beat: Math.round((x.cnt - x.rank) / x.cnt * 100)}));
+  const by = [...S].sort((a, b) => b.d - a.d);
+  const st = by.slice(0, 2).filter(x => x.d > 0), wk = by.slice(-2).reverse().filter(x => x.d < 0);
+  const tag = (x, c) => `<span class="tag" style="background:${c}">${x.n}（${sg(x.d)}，贏過約${x.beat}%同學）</span>`;
+  let h = `<p>💪 <b>優勢科目：</b>${st.length ? st.map(x => tag(x, 'var(--green)')).join('') : '本次沒有高於班平均的科目，下次一起加油！'}</p>`;
+  h += `<p>🌧️ <b>待加強科目：</b>${wk.length ? wk.map(x => tag(x, 'var(--pink)')).join('') : '各科都不低於班平均，很棒！'}</p>`;
+  const fail = S.filter(x => x.s < 60);
+  if (fail.length) h += `<p>⚠️ <b>未達60分：</b>${fail.map(x => x.n).join('、')}，建議優先安排補強與請教老師。</p>`;
+  const gap = Math.max(...S.map(x => x.s)) - Math.min(...S.map(x => x.s));
+  h += `<p>⚖️ 各科最高與最低相差 ${gap} 分，${gap >= 30 ? '科目之間落差較大，可把時間多分配給弱科。' : '各科發展較均衡。'}</p>`;
+  if (p) {
+    const rel = (e.avg - e.cAvg) - (p.avg - p.cAvg);
+    h += `<p>🔄 <b>與上一次（${p.name}）比較：</b>平均 <span class="${cl(e.avg - p.avg)}">${sg(e.avg - p.avg)}</span> 分，相對班級${rel > 1 ? '<span class="up">進步</span>' : rel < -1 ? '<span class="down">退步</span>' : '大致持平'}。</p><ul>`;
+    S.forEach(x => {
+      const o = p.subjects.find(y => y.n === x.n); if (!o) return;
+      const ch = x.d - (o.s - o.avg);
+      if (Math.abs(ch) >= 3) h += `<li>${x.n}：相對班平均${ch > 0 ? '<span class="up">進步' : '<span class="down">退步'} ${Math.abs(ch).toFixed(1)} 分</span></li>`;
+    });
+    h += '</ul>';
+  }
+  return h;
+}
+function trend(cur) {
+  const L = [...D.exams].reverse(), W = 640, H = 220, m = 36, n = L.length;
+  if (n < 2) return '<p>累積兩次以上考試後，就能看到趨勢圖囉！</p>';
+  const all = L.flatMap(e => [e.avg, e.cAvg]), lo = Math.max(0, Math.floor(Math.min(...all) / 10) * 10 - 10), hi = Math.min(100, Math.ceil(Math.max(...all) / 10) * 10 + 5);
+  const X = k => m + k * (W - 2 * m) / (n - 1), Y = v => H - 40 - (v - lo) / (hi - lo) * (H - 70);
+  const line = (key, c) => `<polyline fill="none" stroke="${c}" stroke-width="3" points="${L.map((e, k) => X(k) + ',' + Y(e[key])).join(' ')}"/>` +
+    L.map((e, k) => `<circle cx="${X(k)}" cy="${Y(e[key])}" r="4.5" fill="${c}"/>${key === 'avg' ? `<text x="${X(k)}" y="${Y(e[key]) - 9}" font-size="12" text-anchor="middle" fill="#5b4b5e">${e.avg}</text>` : ''}`).join('');
+  const lab = L.map((e, k) => `<text x="${X(k)}" y="${H - 8}" font-size="11" text-anchor="middle" fill="#5b4b5e">${e.name.replace('學年度', '').replace(/\s+/g, '').replace('段考', '').slice(0, 9)}</text>`).join('');
+  return `<div class="wrap"><svg viewBox="0 0 ${W} ${H}" style="min-width:${Math.max(420, n * 70)}px;width:100%">${line('cAvg', '#8ecae6')}${line('avg', '#ff8fab')}${lab}</svg></div>
+  <span class="tag" style="background:var(--pink)">● 孩子平均</span><span class="tag" style="background:var(--blue)">● 班級平均</span>`;
+}
+</script></body></html>
