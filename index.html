@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="zh-TW"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNzcxNzAwMTI1MzQ5MDIzNTk1OCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzllMTRlZmJiOTkwZGEyNzVfaW5kZXguaHRtbC02NzMifSwiZXhwIjoxNzkyNDkyOTg2LCJpYXQiOjE3OTI0ODkzODYsImFsZyI6IlJTMjU2In0.MlFmVGq_8lSrUslB8enAwboXzeky2IHuN51jNeMrEkphmCbQJxOfaUX9VY-WClsybA6KrfY21B76KUWYhbPM1e4vgTPC39dLrye85q-hSU34awg1kV9tKqcMgISYWkMvXYhCeAEtr1bGciQ9FW5aKGbMAPTlvGIZAcYG4UUR8xhueRWs65r0LRMWGCkJq4EbOlsdz-7AqHCKmyU_Oh0fe8cZgPVp9p3rTls_PlJaIUK_2xHJTYG3anBMGqhubVyjyJFALiW-wj7vzC_YurfjyJQpP6Yjo3a07b57UY0JTnZYRLBjp3OyyEk9sh-2fmoRTp7w-rTPDFF0PlxTdQ1wsQ","c_9e14efbb990da275_index.html-673")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宜蘭縣文化國中901班學習紀錄小站｜家長成績查詢與學習分析</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for Radar and Bar Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+    <!-- Google Fonts: Zen Maru Gothic & Noto Sans TC for rounded friendly typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&amp;family=Zen+Maru+Gothic:wght@500;700;900&amp;display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        rounded: ['"Zen Maru Gothic"', '"Noto Sans TC"', 'sans-serif'],
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        macaron: {
+                            bg: '#FDFBF7',
+                            pink: '#FFD6E0',
+                            pinkDark: '#E86F88',
+                            yellow: '#FFF3B0',
+                            yellowDark: '#D99B26',
+                            blue: '#C6E2FF',
+                            blueDark: '#4A89DC',
+                            mint: '#C8F4DE',
+                            mintDark: '#38A169',
+                            lavender: '#E8DAEF',
+                            lavenderDark: '#8E44AD',
+                            peach: '#FFE5D9',
+                            peachDark: '#DD6B20',
+                            soil: '#5C4D42',
+                            leaf: '#68D391'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF7;
+            background-image: 
+                radial-gradient(circle at 12% 18%, rgba(255, 214, 224, 0.45) 0%, transparent 28%),
+                radial-gradient(circle at 88% 15%, rgba(200, 244, 222, 0.5) 0%, transparent 30%),
+                radial-gradient(circle at 82% 85%, rgba(198, 226, 255, 0.45) 0%, transparent 32%),
+                radial-gradient(circle at 15% 82%, rgba(255, 243, 176, 0.5) 0%, transparent 28%);
+            background-attachment: fixed;
+            color: #4A403A;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-7px) rotate(2deg); }
+        }
+        @keyframes swayLeaf {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(7deg); }
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.96) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .pikmin-float {
+            animation: floatSlow 3.6s ease-in-out infinite;
+        }
+        .pikmin-float-delay {
+            animation: floatSlow 4.2s ease-in-out 1.2s infinite;
+        }
+        .pikmin-float-delay-2 {
+            animation: floatSlow 3.9s ease-in-out 0.6s infinite;
+        }
+        .leaf-sway {
+            transform-origin: bottom center;
+            animation: swayLeaf 2.8s ease-in-out infinite;
+        }
+        .animate-pop {
+            animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .macaron-card {
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 30px -5px rgba(92, 77, 66, 0.07), 0 4px 12px -2px rgba(92, 77, 66, 0.04);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FDFBF7;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E2D5C8;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #C8B6A6;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: #FFFFFF !important;
+            }
+            .macaron-card {
+                box-shadow: none !important;
+                border: 1px solid #E2E8F0 !important;
+                break-inside: avoid;
+            }
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:"Noto Sans TC", sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.inset-y-0{top:0px;bottom:0px}.-bottom-12{bottom:-3rem}.-left-12{left:-3rem}.-right-12{right:-3rem}.-top-12{top:-3rem}.bottom-5{bottom:1.25rem}.right-0{right:0px}.right-5{right:1.25rem}.top-0{top:0px}.z-10{z-index:10}.z-30{z-index:30}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-3{margin-top:0.75rem;margin-bottom:0.75rem}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.mb-\[-14px\]{margin-bottom:-14px}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-1\.5{margin-top:0.375rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.aspect-square{aspect-ratio:1 / 1}.h-11{height:2.75rem}.h-16{height:4rem}.h-2{height:0.5rem}.h-20{height:5rem}.h-24{height:6rem}.h-32{height:8rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-64{height:16rem}.h-7{height:1.75rem}.max-h-\[340px\]{max-height:340px}.max-h-\[90vh\]{max-height:90vh}.min-h-screen{min-height:100vh}.w-11{width:2.75rem}.w-16{width:4rem}.w-2{width:0.5rem}.w-20{width:5rem}.w-32{width:8rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-7{width:1.75rem}.w-full{width:100%}.max-w-3xl{max-width:48rem}.max-w-7xl{max-width:80rem}.max-w-xl{max-width:36rem}.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.border-collapse{border-collapse:collapse}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;user-select:none}.appearance-none{-webkit-appearance:none;appearance:none}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-stone-100 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(245 245 244 / var(--tw-divide-opacity, 1))}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-amber-100{--tw-border-opacity:1;border-color:rgb(254 243 199 / var(--tw-border-opacity, 1))}.border-amber-100\/60{border-color:rgb(254 243 199 / 0.6)}.border-amber-100\/80{border-color:rgb(254 243 199 / 0.8)}.border-amber-200{--tw-border-opacity:1;border-color:rgb(253 230 138 / var(--tw-border-opacity, 1))}.border-amber-200\/70{border-color:rgb(253 230 138 / 0.7)}.border-amber-200\/80{border-color:rgb(253 230 138 / 0.8)}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77 / var(--tw-border-opacity, 1))}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208 / var(--tw-border-opacity, 1))}.border-emerald-300{--tw-border-opacity:1;border-color:rgb(110 231 183 / var(--tw-border-opacity, 1))}.border-purple-200{--tw-border-opacity:1;border-color:rgb(233 213 255 / var(--tw-border-opacity, 1))}.border-rose-200{--tw-border-opacity:1;border-color:rgb(254 205 211 / var(--tw-border-opacity, 1))}.border-rose-300{--tw-border-opacity:1;border-color:rgb(253 164 175 / var(--tw-border-opacity, 1))}.border-sky-200{--tw-border-opacity:1;border-color:rgb(186 230 253 / var(--tw-border-opacity, 1))}.border-stone-200{--tw-border-opacity:1;border-color:rgb(231 229 228 / var(--tw-border-opacity, 1))}.border-stone-200\/80{border-color:rgb(231 229 228 / 0.8)}.border-stone-300{--tw-border-opacity:1;border-color:rgb(214 211 209 / var(--tw-border-opacity, 1))}.border-white{--tw-border-opacity:1;border-color:rgb(255 255 255 / var(--tw-border-opacity, 1))}.bg-amber-50{--tw-bg-opacity:1;background-color:rgb(255 251 235 / var(--tw-bg-opacity, 1))}.bg-amber-50\/60{background-color:rgb(255 251 235 / 0.6)}.bg-amber-50\/70{background-color:rgb(255 251 235 / 0.7)}.bg-amber-50\/90{background-color:rgb(255 251 235 / 0.9)}.bg-emerald-50\/70{background-color:rgb(236 253 245 / 0.7)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-macaron-blue\/60{background-color:rgb(198 226 255 / 0.6)}.bg-macaron-blue\/70{background-color:rgb(198 226 255 / 0.7)}.bg-macaron-lavender{--tw-bg-opacity:1;background-color:rgb(232 218 239 / var(--tw-bg-opacity, 1))}.bg-macaron-lavender\/70{background-color:rgb(232 218 239 / 0.7)}.bg-macaron-mint{--tw-bg-opacity:1;background-color:rgb(200 244 222 / var(--tw-bg-opacity, 1))}.bg-macaron-mint\/40{background-color:rgb(200 244 222 / 0.4)}.bg-macaron-pink{--tw-bg-opacity:1;background-color:rgb(255 214 224 / var(--tw-bg-opacity, 1))}.bg-macaron-pink\/35{background-color:rgb(255 214 224 / 0.35)}.bg-macaron-pink\/60{background-color:rgb(255 214 224 / 0.6)}.bg-macaron-pink\/80{background-color:rgb(255 214 224 / 0.8)}.bg-macaron-soil{--tw-bg-opacity:1;background-color:rgb(92 77 66 / var(--tw-bg-opacity, 1))}.bg-macaron-yellow{--tw-bg-opacity:1;background-color:rgb(255 243 176 / var(--tw-bg-opacity, 1))}.bg-macaron-yellow\/80{background-color:rgb(255 243 176 / 0.8)}.bg-purple-50\/70{background-color:rgb(250 245 255 / 0.7)}.bg-rose-50{--tw-bg-opacity:1;background-color:rgb(255 241 242 / var(--tw-bg-opacity, 1))}.bg-rose-50\/70{background-color:rgb(255 241 242 / 0.7)}.bg-sky-50\/70{background-color:rgb(240 249 255 / 0.7)}.bg-stone-100\/80{background-color:rgb(245 245 244 / 0.8)}.bg-stone-50{--tw-bg-opacity:1;background-color:rgb(250 250 249 / var(--tw-bg-opacity, 1))}.bg-stone-900\/50{background-color:rgb(28 25 23 / 0.5)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/50{background-color:rgb(255 255 255 / 0.5)}.bg-white\/85{background-color:rgb(255 255 255 / 0.85)}.bg-sky-50{--tw-bg-opacity:1;background-color:rgb(240 249 255 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.bg-gradient-to-tr{background-image:linear-gradient(to top right, var(--tw-gradient-stops))}.from-macaron-mint{--tw-gradient-from:#C8F4DE var(--tw-gradient-from-position);--tw-gradient-to:rgb(200 244 222 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-macaron-pink{--tw-gradient-from:#FFD6E0 var(--tw-gradient-from-position);--tw-gradient-to:rgb(255 214 224 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-macaron-yellow{--tw-gradient-to:rgb(255 243 176 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #FFF3B0 var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-macaron-mint{--tw-gradient-to:#C8F4DE var(--tw-gradient-to-position)}.to-macaron-pink{--tw-gradient-to:#FFD6E0 var(--tw-gradient-to-position)}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-5{padding-top:1.25rem;padding-bottom:1.25rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.pr-10{padding-right:2.5rem}.pt-3{padding-top:0.75rem}.pt-5{padding-top:1.25rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-medium{font-weight:500}.leading-relaxed{line-height:1.625}.tracking-tight{letter-spacing:-0.025em}.tracking-widest{letter-spacing:0.1em}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14 / var(--tw-text-opacity, 1))}.text-amber-900{--tw-text-opacity:1;color:rgb(120 53 15 / var(--tw-text-opacity, 1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70 / var(--tw-text-opacity, 1))}.text-emerald-900{--tw-text-opacity:1;color:rgb(6 78 59 / var(--tw-text-opacity, 1))}.text-macaron-soil{--tw-text-opacity:1;color:rgb(92 77 66 / var(--tw-text-opacity, 1))}.text-purple-900{--tw-text-opacity:1;color:rgb(88 28 135 / var(--tw-text-opacity, 1))}.text-rose-500{--tw-text-opacity:1;color:rgb(244 63 94 / var(--tw-text-opacity, 1))}.text-rose-600{--tw-text-opacity:1;color:rgb(225 29 72 / var(--tw-text-opacity, 1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60 / var(--tw-text-opacity, 1))}.text-rose-900{--tw-text-opacity:1;color:rgb(136 19 55 / var(--tw-text-opacity, 1))}.text-sky-700{--tw-text-opacity:1;color:rgb(3 105 161 / var(--tw-text-opacity, 1))}.text-sky-900{--tw-text-opacity:1;color:rgb(12 74 110 / var(--tw-text-opacity, 1))}.text-stone-400{--tw-text-opacity:1;color:rgb(168 162 158 / var(--tw-text-opacity, 1))}.text-stone-500{--tw-text-opacity:1;color:rgb(120 113 108 / var(--tw-text-opacity, 1))}.text-stone-600{--tw-text-opacity:1;color:rgb(87 83 78 / var(--tw-text-opacity, 1))}.text-stone-700{--tw-text-opacity:1;color:rgb(68 64 60 / var(--tw-text-opacity, 1))}.text-stone-800{--tw-text-opacity:1;color:rgb(41 37 36 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-sky-800{--tw-text-opacity:1;color:rgb(7 89 133 / var(--tw-text-opacity, 1))}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.blur-xl{--tw-blur:blur(24px);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.selection\:bg-macaron-pink *::selection{--tw-bg-opacity:1;background-color:rgb(255 214 224 / var(--tw-bg-opacity, 1))}.selection\:text-macaron-soil *::selection{--tw-text-opacity:1;color:rgb(92 77 66 / var(--tw-text-opacity, 1))}.selection\:bg-macaron-pink::selection{--tw-bg-opacity:1;background-color:rgb(255 214 224 / var(--tw-bg-opacity, 1))}.selection\:text-macaron-soil::selection{--tw-text-opacity:1;color:rgb(92 77 66 / var(--tw-text-opacity, 1))}.hover\:bg-macaron-lavender:hover{--tw-bg-opacity:1;background-color:rgb(232 218 239 / var(--tw-bg-opacity, 1))}.hover\:bg-macaron-pink:hover{--tw-bg-opacity:1;background-color:rgb(255 214 224 / var(--tw-bg-opacity, 1))}.hover\:bg-stone-100:hover{--tw-bg-opacity:1;background-color:rgb(245 245 244 / var(--tw-bg-opacity, 1))}.hover\:bg-stone-50:hover{--tw-bg-opacity:1;background-color:rgb(250 250 249 / var(--tw-bg-opacity, 1))}.hover\:bg-macaron-yellow\/70:hover{background-color:rgb(255 243 176 / 0.7)}.hover\:text-stone-800:hover{--tw-text-opacity:1;color:rgb(41 37 36 / var(--tw-text-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.hover\:brightness-95:hover{--tw-brightness:brightness(.95);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.focus\:border-macaron-pinkDark:focus{--tw-border-opacity:1;border-color:rgb(232 111 136 / var(--tw-border-opacity, 1))}.focus\:bg-white:focus{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.active\:scale-\[0\.99\]:active{--tw-scale-x:0.99;--tw-scale-y:0.99;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width: 640px){.sm\:h-24{height:6rem}.sm\:h-28{height:7rem}.sm\:h-72{height:18rem}.sm\:w-20{width:5rem}.sm\:w-24{width:6rem}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:grid-cols-6{grid-template-columns:repeat(6, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:gap-3{gap:0.75rem}.sm\:gap-4{gap:1rem}.sm\:gap-6{gap:1.5rem}.sm\:p-5{padding:1.25rem}.sm\:p-7{padding:1.75rem}.sm\:p-8{padding:2rem}.sm\:p-9{padding:2.25rem}.sm\:py-10{padding-top:2.5rem;padding-bottom:2.5rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 768px){.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:items-center{align-items:center}}@media (min-width: 1024px){.lg\:col-span-5{grid-column:span 5 / span 5}.lg\:col-span-7{grid-column:span 7 / span 7}.lg\:grid-cols-12{grid-template-columns:repeat(12, minmax(0, 1fr))}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}}</style></head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-macaron-pink selection:text-macaron-soil">
+
+    <header class="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-amber-100/80 px-4 py-3 no-print">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand Title -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="resetToLogin()">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-macaron-mint via-macaron-yellow to-macaron-pink flex items-center justify-center shadow-sm border border-white">
+                    <svg class="w-7 h-7 leaf-sway" viewBox="0 0 64 64" fill="none">
+                        <path d="M32 54V28" stroke="#48BB78" stroke-width="5" stroke-linecap="round"></path>
+                        <path d="M32 38C22 36 16 28 20 22C24 16 32 26 32 38Z" fill="#68D391"></path>
+                        <circle cx="32" cy="18" r="6" fill="#FFF3B0"></circle>
+                        <circle cx="32" cy="9" r="5" fill="#FFD6E0"></circle>
+                        <circle cx="41" cy="15" r="5" fill="#FFD6E0"></circle>
+                        <circle cx="38" cy="24" r="5" fill="#FFD6E0"></circle>
+                        <circle cx="26" cy="24" r="5" fill="#FFD6E0"></circle>
+                        <circle cx="23" cy="15" r="5" fill="#FFD6E0"></circle>
+                        <circle cx="32" cy="18" r="4.5" fill="#F6AD55"></circle>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h1 id="siteTitleHeader" class="text-lg sm:text-xl font-black tracking-tight text-macaron-soil">宜蘭縣文化國中901班學習紀錄小站</h1>
+                        <span id="syncStatusBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-macaron-mint text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span id="syncStatusText">已即時連動 Google 試算表 (35人)</span>
+                        </span>
+                    </div>
+                    <p id="examSubtitleHeader" class="text-xs text-stone-500">親師連心・個人化成績查詢、組距落點與學習優勢分析</p>
+                </div>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="openSheetModal()" class="text-xs sm:text-sm font-bold px-3.5 py-2 rounded-2xl bg-macaron-lavender/70 hover:bg-macaron-lavender text-purple-900 border border-purple-200 transition flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    <span>老師專區：試算表連動設定</span>
+                </button>
+                <button id="logoutBtn" onclick="resetToLogin()" class="hidden text-xs sm:text-sm font-bold px-3.5 py-2 rounded-2xl bg-macaron-pink/80 hover:bg-macaron-pink text-rose-900 border border-rose-200 transition flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span>切換學生 / 登出</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 sm:py-10">
+
+        <!-- VIEW 1: PARENT LOGIN -->
+        <section id="loginView" class="max-w-xl mx-auto animate-pop">
+            <!-- Cute Pikmin Parade Banner -->
+            <div class="flex justify-center items-end gap-3 sm:gap-6 mb-[-14px] relative z-10 select-none pointer-events-none">
+                <!-- Red Macaron Pikmin (Leaf) -->
+                <div class="pikmin-float">
+                    <svg class="w-16 h-20 sm:w-20 sm:h-24" viewBox="0 0 100 120" fill="none">
+                        <path d="M50 35 Q52 15 65 8" stroke="#48BB78" stroke-width="4" stroke-linecap="round"></path>
+                        <path d="M65 8 C50 6 48 22 65 24 C76 22 76 10 65 8 Z" fill="#68D391"></path>
+                        <ellipse cx="50" cy="68" rx="24" ry="28" fill="#FFB3C6"></ellipse>
+                        <circle cx="50" cy="46" r="20" fill="#FFB3C6"></circle>
+                        <circle cx="42" cy="43" r="4.5" fill="#FFFFFF"></circle>
+                        <circle cx="43" cy="43" r="2.2" fill="#2D3748"></circle>
+                        <circle cx="58" cy="43" r="4.5" fill="#FFFFFF"></circle>
+                        <circle cx="57" cy="43" r="2.2" fill="#2D3748"></circle>
+                        <!-- Pointy Red Pikmin Nose -->
+                        <path d="M47 47 L50 56 L54 48 Z" fill="#FB7185"></path>
+                        <ellipse cx="37" cy="49" rx="3.5" ry="2" fill="#FB7185" opacity="0.5"></ellipse>
+                        <ellipse cx="63" cy="49" rx="3.5" ry="2" fill="#FB7185" opacity="0.5"></ellipse>
+                    </svg>
+                </div>
+                <!-- Yellow Macaron Pikmin (Flower + Ears) -->
+                <div class="pikmin-float-delay">
+                    <svg class="w-20 h-24 sm:w-24 sm:h-28" viewBox="0 0 100 130" fill="none">
+                        <path d="M50 42 Q50 24 50 18" stroke="#48BB78" stroke-width="4" stroke-linecap="round"></path>
+                        <circle cx="50" cy="14" r="6" fill="#FFFFFF"></circle>
+                        <circle cx="42" cy="14" r="5" fill="#FFFFFF"></circle>
+                        <circle cx="58" cy="14" r="5" fill="#FFFFFF"></circle>
+                        <circle cx="50" cy="7" r="5" fill="#FFFFFF"></circle>
+                        <circle cx="50" cy="21" r="5" fill="#FFFFFF"></circle>
+                        <circle cx="50" cy="14" r="4" fill="#F6AD55"></circle>
+                        <!-- Big Cute Ears -->
+                        <path d="M28 50 L14 42 L26 60 Z" fill="#FDE047"></path>
+                        <path d="M72 50 L86 42 L74 60 Z" fill="#FDE047"></path>
+                        <ellipse cx="50" cy="78" rx="25" ry="28" fill="#FEF08A"></ellipse>
+                        <circle cx="50" cy="54" r="21" fill="#FEF08A"></circle>
+                        <circle cx="42" cy="52" r="4.8" fill="#FFFFFF"></circle>
+                        <circle cx="42" cy="52" r="2.3" fill="#2D3748"></circle>
+                        <circle cx="58" cy="52" r="4.8" fill="#FFFFFF"></circle>
+                        <circle cx="58" cy="52" r="2.3" fill="#2D3748"></circle>
+                        <path d="M46 59 Q50 63 54 59" stroke="#B45309" stroke-width="2.2" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+                <!-- Blue Macaron Pikmin (Bud) -->
+                <div class="pikmin-float-delay-2">
+                    <svg class="w-16 h-20 sm:w-20 sm:h-24" viewBox="0 0 100 120" fill="none">
+                        <path d="M50 35 Q48 18 44 12" stroke="#48BB78" stroke-width="4" stroke-linecap="round"></path>
+                        <circle cx="43" cy="11" r="6.5" fill="#93C5FD"></circle>
+                        <ellipse cx="50" cy="68" rx="24" ry="28" fill="#BAE6FD"></ellipse>
+                        <circle cx="50" cy="46" r="20" fill="#BAE6FD"></circle>
+                        <circle cx="42" cy="43" r="4.5" fill="#FFFFFF"></circle>
+                        <circle cx="42" cy="43" r="2.2" fill="#2D3748"></circle>
+                        <circle cx="58" cy="43" r="4.5" fill="#FFFFFF"></circle>
+                        <circle cx="58" cy="43" r="2.2" fill="#2D3748"></circle>
+                        <!-- Cute Mouth -->
+                        <ellipse cx="50" cy="51" rx="4" ry="2.5" fill="#F472B6"></ellipse>
+                        <ellipse cx="36" cy="48" rx="3.5" ry="2" fill="#60A5FA" opacity="0.4"></ellipse>
+                        <ellipse cx="64" cy="48" rx="3.5" ry="2" fill="#60A5FA" opacity="0.4"></ellipse>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Login Card -->
+            <div class="macaron-card rounded-3xl p-6 sm:p-9 relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-macaron-pink/35 blur-xl pointer-events-none"></div>
+                <div class="absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-macaron-mint/40 blur-xl pointer-events-none"></div>
+
+                <div class="text-center mb-6">
+                    <span class="inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-macaron-yellow/80 text-amber-900 border border-amber-200 mb-2">
+                        🌱 宜蘭縣文化國中・901班親師專區
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-black text-macaron-soil">家長成績查詢與學習分析</h2>
+                    <p class="text-sm text-stone-500 mt-1">請選擇孩子的姓名，並輸入學生身分證字號後五碼登入</p>
+                </div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+                    <div>
+                        <label for="studentSelect" class="block text-sm font-bold text-stone-700 mb-1.5">
+                            1. 選擇 901 班學生姓名 <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <select id="studentSelect" required="" class="w-full appearance-none rounded-2xl bg-amber-50/60 border-2 border-stone-200 focus:border-macaron-pinkDark focus:bg-white px-4 py-3.5 pr-10 text-base font-bold text-stone-800 outline-none transition"><option value="">-- 請選擇 901 班學生姓名（共 35 位） --</option><option value="0">01號 - 01王鏡境</option><option value="1">02號 - 03王奕涵</option><option value="2">03號 - 04邱若綺</option><option value="3">04號 - 05林樂禹</option><option value="4">05號 - 06陳映叡</option><option value="5">06號 - 07陳耕渼</option><option value="6">07號 - 08王沂恩</option><option value="7">08號 - 09黃子裴</option><option value="8">09號 - 11江妤晨</option><option value="9">10號 - 12莊妍熙</option><option value="10">11號 - 15陳奕安</option><option value="11">12號 - 16陳品睿</option><option value="12">13號 - 17林品叡</option><option value="13">14號 - 18簡丞浚</option><option value="14">15號 - 19黃晨衍</option><option value="15">16號 - 20陳冠穎</option><option value="16">17號 - 21詹楷丞</option><option value="17">18號 - 22游楷陞</option><option value="18">19號 - 23林子軒</option><option value="19">20號 - 24李鍇銓</option><option value="20">21號 - 25鄧丞喆</option><option value="21">22號 - 26劉冠澤</option><option value="22">23號 - 27張凱瑄</option><option value="23">24號 - 28游立仲</option><option value="24">25號 - 29林孝璟</option><option value="25">26號 - 30洪承靖</option><option value="26">27號 - 31吳奇鴻</option><option value="27">28號 - 國文</option><option value="28">29號 - 0</option><option value="29">30號 - 1</option><option value="30">31號 - 2</option><option value="31">32號 - 5</option><option value="32">33號 - 3</option><option value="33">34號 - 16</option><option value="34">35號 - 27</option></select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-stone-500">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="idLast5Input" class="block text-sm font-bold text-stone-700 mb-1.5">
+                            2. 學生身分證字號後五碼 <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <input id="idLast5Input" type="password" inputmode="numeric" maxlength="5" placeholder="例如：12345" required="" class="w-full rounded-2xl bg-amber-50/60 border-2 border-stone-200 focus:border-macaron-pinkDark focus:bg-white px-4 py-3.5 text-base font-bold tracking-widest text-stone-800 outline-none transition">
+                            <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 px-4 text-xs font-bold text-stone-500 hover:text-stone-800">
+                                顯示/隱藏
+                            </button>
+                        </div>
+                        <p class="text-xs text-stone-400 mt-1.5">🔒 採用個人隱私保護，僅本人與家長可查閱個人成績與全班組距落點。</p>
+                    </div>
+
+                    <!-- Error message box -->
+                    <div id="loginErrorBox" class="hidden rounded-2xl bg-rose-50 border-2 border-rose-200 p-3.5 text-sm font-bold text-rose-700 flex items-center gap-2">
+                        <svg class="w-5 h-5 shrink-0 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span id="loginErrorText">身分證後五碼不正確，請重新確認喔！</span>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-macaron-pink via-macaron-yellow to-macaron-mint hover:brightness-95 active:scale-[0.99] text-macaron-soil font-black text-lg shadow-md border-2 border-white transition flex items-center justify-center gap-2">
+                        <span>🌸 進入 901 班個人學習花園</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                    </button>
+                </form>
+
+                <!-- Demo Quick-Login Helper (Automatically hides when real Google Sheet is connected if desired, or shows quick test accounts) -->
+                <div id="demoQuickBox" class="mt-6 pt-5 border-t border-dashed border-stone-200 hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-stone-500">✨ 範例體驗帳號（點擊可快速帶入測試）：</span>
+                        <span class="text-[11px] text-stone-400">綁定正式試算表後將自動隱藏</span>
+                    </div>
+                    <div id="demoAccountPills" class="flex flex-wrap gap-2"><button type="button" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-macaron-yellow/70 text-stone-700 border border-amber-200 transition">1號 林子軒 (12345)</button><button type="button" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-macaron-yellow/70 text-stone-700 border border-amber-200 transition">2號 陳語彤 (23456)</button><button type="button" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-macaron-yellow/70 text-stone-700 border border-amber-200 transition">3號 張宥廷 (34567)</button><button type="button" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-macaron-yellow/70 text-stone-700 border border-amber-200 transition">4號 黃品妍 (45678)</button><button type="button" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-macaron-yellow/70 text-stone-700 border border-amber-200 transition">5號 吳承恩 (56789)</button></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: STUDENT GRADE & ANALYSIS DASHBOARD -->
+        <section id="dashboardView" class="hidden space-y-6 animate-pop">
+
+            <!-- Student Welcome Banner -->
+            <div class="macaron-card rounded-3xl p-5 sm:p-7 relative overflow-hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-start sm:items-center gap-4">
+                        <div class="w-16 h-16 rounded-3xl bg-gradient-to-br from-macaron-pink via-macaron-yellow to-macaron-mint flex items-center justify-center border-2 border-white shadow-sm shrink-0">
+                            <span id="studentSeatBadge" class="text-2xl font-black text-macaron-soil">01</span>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-macaron-yellow text-amber-900 border border-amber-200">宜蘭縣文化國中 901班</span>
+                                <span id="studentExamTag" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-macaron-blue/70 text-sky-900 border border-sky-200">定期評量紀錄</span>
+                            </div>
+                            <h2 class="text-2xl sm:text-3xl font-black text-macaron-soil mt-1">
+                                <span id="studentNameTitle">王小明</span> 同學的學習成長報告
+                            </h2>
+                            <p id="studentCommentPreview" class="text-xs sm:text-sm text-stone-600 mt-1"></p>
+                        </div>
+                    </div>
+
+                    <!-- Print / Action Buttons -->
+                    <div class="flex flex-wrap items-center gap-2 no-print">
+                        <button onclick="window.print()" class="text-xs sm:text-sm font-bold px-4 py-2.5 rounded-2xl bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 shadow-sm transition flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            <span>列印 / 存成 PDF</span>
+                        </button>
+                        <button onclick="copyParentFeedback()" class="text-xs sm:text-sm font-bold px-4 py-2.5 rounded-2xl bg-macaron-mint hover:brightness-95 text-emerald-900 border border-emerald-200 shadow-sm transition flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            <span>複製家長簽閱回條</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Top 4 KPI Summary Cards -->
+                <div id="kpiSummaryGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6"></div>
+            </div>
+
+            <!-- Subject Score Cards Section -->
+            <div class="macaron-card rounded-3xl p-5 sm:p-7">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-black text-macaron-soil flex items-center gap-2">
+                            <span>🌷 各科成績與班級指標對照</span>
+                        </h3>
+                        <p class="text-xs text-stone-500">包含個人得分、班級平均、全班最高、所屬組距區間與相對表現等第</p>
+                    </div>
+                    <span class="text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                        💡 點擊下方任一科目可切換右側「組距人數落點圖」
+                    </span>
+                </div>
+
+                <div id="subjectScoreCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- Charts Row: Left = Radar Balance Chart, Right = Bulletproof Grade Distribution Chart -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left: Five-Subject Radar Analysis -->
+                <div class="lg:col-span-5 macaron-card rounded-3xl p-5 sm:p-7 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-lg sm:text-xl font-black text-macaron-soil">🧭 學科能力均衡雷達圖</h3>
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-macaron-pink/60 text-rose-900">個人 vs 班平均 vs 前標</span>
+                        </div>
+                        <p class="text-xs text-stone-500 mb-4">一眼看出孩子的學科形狀是否均衡，以及哪些科目超越全班前標（前25%）水準。</p>
+                    </div>
+                    <div class="relative w-full aspect-square max-h-[340px] mx-auto flex items-center justify-center">
+                        <canvas id="radarChartCanvas"></canvas>
+                    </div>
+                    <div id="radarLegendNote" class="mt-4 text-xs text-stone-500 bg-amber-50/70 rounded-2xl p-3 border border-amber-100"></div>
+                </div>
+
+                <!-- Right: Grade Distribution (Solves Spreadsheet Conversion Missing Formula Issue!) -->
+                <div class="lg:col-span-7 macaron-card rounded-3xl p-5 sm:p-7 flex flex-col justify-between">
+                    <div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <div>
+                                <h3 class="text-lg sm:text-xl font-black text-macaron-soil flex items-center gap-2">
+                                    <span>📊 901班各科組距人數落點分析</span>
+                                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-macaron-mint text-emerald-900 border border-emerald-200">自動防漏演算</span>
+                                </h3>
+                                <p class="text-xs text-stone-500 mt-0.5">系統已自動由全班成績重新統計組距人數，解決試算表轉檔無法顯示組距的問題！</p>
+                            </div>
+                        </div>
+
+                        <!-- Subject Selector Pills for Distribution -->
+                        <div id="distSubjectTabs" class="flex flex-wrap gap-1.5 my-3"></div>
+                    </div>
+
+                    <!-- Chart + Highlight Banner -->
+                    <div class="relative w-full h-64 sm:h-72 mt-1">
+                        <canvas id="distributionChartCanvas"></canvas>
+                    </div>
+
+                    <!-- Explicit Distribution Table (100, 90-99, 80-89, 70-79, 60-69, <60) -->
+                    <div class="mt-4">
+                        <div class="text-xs font-bold text-stone-600 mb-2 flex items-center justify-between">
+                            <span id="distTableTitle">【國文】全班組距人數明細表（彩色標記為孩子的落點區間）</span>
+                            <span id="distStudentPositionText" class="text-rose-600 font-black"></span>
+                        </div>
+                        <div id="distIntervalBoxes" class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strengths & Weaknesses Intelligent Analysis -->
+            <div class="macaron-card rounded-3xl p-5 sm:p-7">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-black text-macaron-soil">🌱 皮克敏學習診斷室：優勢與待加強分析</h3>
+                        <p class="text-xs text-stone-500">結合「原始分數」與「班級相對標準差（T分數）」，避免因考題難易造成誤判，精準找出孩子的真優勢！</p>
+                    </div>
+                    <span class="text-xs font-bold px-3 py-1 rounded-full bg-macaron-lavender/70 text-purple-900 border border-purple-200">
+                        自動個人化診斷
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="strengthsWeaknessesGrid"></div>
+
+                <!-- Relative Z/T-Score Bar Table -->
+                <div class="mt-6 pt-5 border-t border-stone-200/80">
+                    <h4 class="text-sm font-black text-macaron-soil mb-3">📈 各科「相對班級表現指數」排行（50 為班級平均水準，越高代表在班上優勢越明顯）</h4>
+                    <div id="relativeStrengthBars" class="space-y-2.5"></div>
+                </div>
+            </div>
+
+            <!-- All Spreadsheet Fields Complete Display -->
+            <div class="macaron-card rounded-3xl p-5 sm:p-7">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-black text-macaron-soil">📋 試算表完整資料明細（全欄位完整呈現）</h3>
+                        <p class="text-xs text-stone-500">試算表內記錄的所有欄位（包含平時表現、缺曠、獎懲、作業抽查、導師評語或備註）皆完整顯示於此</p>
+                    </div>
+                    <span id="totalColumnsBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-macaron-blue/60 text-sky-900 border border-sky-200">
+                        共載入 0 個欄位
+                    </span>
+                </div>
+
+                <div id="allSpreadsheetFieldsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            </div>
+
+            <!-- All Subjects Multi-Row Matrix Table (Cross-Subject Overview + Class Distribution Table) -->
+            <div class="macaron-card rounded-3xl p-5 sm:p-7 overflow-hidden">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-black text-macaron-soil">📑 901班各科組距人數總表（全科一覽）</h3>
+                        <p class="text-xs text-stone-500">方便家長一次對照所有科目的全班人數分布，表格內「★」代表孩子所在的分數區間</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto rounded-2xl border border-stone-200">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-amber-50/90 text-macaron-soil border-b border-stone-200">
+                                <th class="py-3 px-3 font-black">科目名稱</th>
+                                <th class="py-3 px-3 font-black text-center">孩子成績</th>
+                                <th class="py-3 px-3 font-black text-center">班級平均</th>
+                                <th class="py-3 px-3 font-black text-center bg-rose-50/70">100分</th>
+                                <th class="py-3 px-3 font-black text-center bg-amber-50/70">90-99分</th>
+                                <th class="py-3 px-3 font-black text-center bg-emerald-50/70">80-89分</th>
+                                <th class="py-3 px-3 font-black text-center bg-sky-50/70">70-79分</th>
+                                <th class="py-3 px-3 font-black text-center bg-purple-50/70">60-69分</th>
+                                <th class="py-3 px-3 font-black text-center bg-stone-100/80">未滿60分</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fullDistributionMatrixBody" class="divide-y divide-stone-100 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- TEACHER MODAL: GOOGLE SHEET LIVE SYNC & GITHUB HELPER -->
+    <div id="sheetModal" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border-2 border-amber-100 p-6 sm:p-8 animate-pop">
+            <div class="flex items-start justify-between gap-4 mb-4">
+                <div>
+                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-macaron-lavender text-purple-900">老師專屬設定工具</span>
+                    <h3 class="text-xl sm:text-2xl font-black text-macaron-soil mt-1">🔗 Google 試算表自動連動 &amp; 匯入設定</h3>
+                    <p class="text-xs sm:text-sm text-stone-500">只要貼上 Google 試算表網址，以後在試算表修改成績，網頁就會自動同步更新！</p>
+                </div>
+                <button onclick="closeSheetModal()" class="p-2 rounded-full hover:bg-stone-100 text-stone-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Method 1: Live Google Sheet Link -->
+                <div class="rounded-2xl bg-amber-50/70 border-2 border-amber-200/80 p-4 sm:p-5">
+                    <h4 class="font-black text-macaron-soil text-base mb-1">✨ 方法一：貼上 Google 試算表網址（推薦！即時連動）</h4>
+                    <p class="text-xs text-stone-600 mb-3 leading-relaxed">
+                        1. 在您的 Google 試算表右上角點選 <b>「共用」→ 將一般存取權改為「知道連結的任何人可檢視」</b>（或點選「檔案 → 共用 → 發布到網路 → CSV」）。<br>
+                        2. 將試算表網址貼在下方，點擊「測試連線並載入」即可立即預覽！
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input id="googleSheetUrlInput" type="url" placeholder="貼上 Google 試算表網址，例如：https://docs.google.com/spreadsheets/d/1AbCdEfG.../edit" class="flex-grow rounded-xl bg-white border-2 border-stone-200 focus:border-macaron-pinkDark px-3.5 py-2.5 text-sm font-medium outline-none">
+                        <button onclick="connectGoogleSheetFromInput()" class="px-5 py-2.5 rounded-xl bg-macaron-mint hover:brightness-95 text-emerald-900 font-black text-sm border border-emerald-300 shadow-sm shrink-0">
+                            🔄 測試連線並載入
+                        </button>
+                    </div>
+                    <div id="sheetConnectStatus" class="mt-3 text-xs font-bold p-3 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 block">✅ 連線成功！已自動載入 <b>35 位學生</b> 與 <b>5 個考科</b>，組距人數已自動演算完成！</div>
+
+                    <!-- One-Click Copy Full HTML with Embedded URL for GitHub -->
+                    <div class="mt-4 pt-3 border-t border-amber-200/70 flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-xs text-stone-600">💡 測試成功後，點右方按鈕即可複製<b>「已寫死該試算表網址」</b>的完整網頁程式碼，直接貼到 GitHub 就完成了！</span>
+                        <button onclick="copyFullHtmlWithSheetUrl()" class="px-4 py-2 rounded-xl bg-macaron-pink hover:brightness-95 text-rose-900 font-black text-xs border border-rose-300 shadow-sm">
+                            📋 一鍵複製已綁定試算表的 GitHub 完整程式碼
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Method 2: Direct Copy-Paste from Excel / Google Sheet -->
+                <div class="rounded-2xl bg-stone-50 border border-stone-200 p-4 sm:p-5">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <h4 class="font-black text-macaron-soil text-base">📋 方法二：直接複製貼上試算表內容（免設定權限也能立即預覽）</h4>
+                        <button onclick="fillSampleCsvToTextarea()" class="text-xs font-bold text-sky-700 hover:underline">載入 901 班範例格式</button>
+                    </div>
+                    <p class="text-xs text-stone-500 mb-2">
+                        試算表第一列（標題列）請包含：<code class="bg-white px-1.5 py-0.5 rounded border">姓名</code>、<code class="bg-white px-1.5 py-0.5 rounded border">身分證後五碼</code>（或密碼），其餘欄位（如：座號、國文、英語、數學、自然、社會、導師評語、缺曠、平時成績...）系統會自動辨識！
+                    </p>
+                    <textarea id="rawCsvTextarea" rows="5" placeholder="請從 Excel 或 Google 試算表全選複製（Ctrl+C），直接貼上（Ctrl+V）到這裡..." class="w-full rounded-xl bg-white border border-stone-300 p-3 text-xs font-mono text-stone-700 outline-none focus:border-macaron-pinkDark"></textarea>
+                    <div class="flex justify-end gap-2 mt-3">
+                        <button onclick="importFromTextarea()" class="px-5 py-2 rounded-xl bg-macaron-yellow hover:brightness-95 text-amber-900 font-black text-xs sm:text-sm border border-amber-300 shadow-sm">
+                            ✅ 解析貼上的試算表資料
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastBox" class="fixed bottom-5 right-5 z-50 rounded-2xl bg-macaron-soil text-white px-5 py-3.5 text-sm font-bold shadow-xl flex items-center gap-2 no-print hidden">
+        <span>🌱</span>
+        <span id="toastMessage">🎉 已複製完整網頁程式碼！現在直接去 GitHub 貼上成 index.html 即可！</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-5 px-4 text-center text-xs text-stone-400 border-t border-amber-100/60 bg-white/50 no-print">
+        <p>🌸 宜蘭縣文化國中901班學習紀錄小站 ｜ 皮克敏馬卡龍溫暖親師平台 ｜ 自動組距演算與個人化學習分析</p>
+    </footer>
+
+    <script>
+        /**
+         * ============================================================================
+         * ⭐ 老師專屬設定區（上傳 GitHub 時，只需把試算表網址貼在下方雙引號內！）
+         * ============================================================================
+         * 支援兩種網址格式，任選一種貼上即可：
+         * 1. Google 試算表一般共用網址（權限設為「知道連結的任何人可檢視」）：
+         *    例如："https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKlMnOpQrStUvWxYz/edit?usp=sharing"
+         * 2. Google 試算表「檔案 -> 共用 -> 發布到網路 -> 逗號分隔值 (.csv)」網址：
+         *    例如："https://docs.google.com/spreadsheets/d/e/2PACX-1v.../pub?output=csv"
+         */
+        const CONFIG = {
+            SITE_TITLE: "宜蘭縣文化國中901班學習紀錄小站",
+            EXAM_SUBTITLE: "114學年度 901班定期評量與學習成長紀錄",
+            GOOGLE_SHEET_URL: "https://docs.google.com/spreadsheets/d/1PWH9BlSZysOsdVuQvoaig-bud8lYz6V7smOF1m2B6x4/edit?usp=sharing" // 👈 請將您的 Google 試算表網址貼在這個雙引號中間！
+        };
+
+        const DEFAULT_CLASS_901_CSV = `座號,姓名,身分證後五碼,國文,英語,數學,自然,社會,寫作測驗,平時作業完成率,缺曠紀錄,獎懲紀錄,模擬考志願目標,導師溫暖評語
+1,林子軒,12345,92,88,96,94,89,5級分,100%,全勤,嘉獎2次,國立宜蘭高中,子軒數理邏輯非常敏銳，上課專注度高！英語聽力與社會科記憶題若再多加溫習，會考表現一定更加亮眼！
+2,陳語彤,23456,95,96,82,80,93,6級分,100%,全勤,小功1次、嘉獎1次,國立羅東高中,語彤在語文與人文社會領域表現極為出色，寫作富有感情；數理科建議多練習圖表題型，穩紮穩打就能突破A級！
+3,張宥廷,34567,76,72,88,91,78,4級分,95%,事假1節,嘉獎1次,國立宜蘭高商,宥廷動手實驗與自然科理解力很棒！國文閱讀長文與英語單字量可以每天固定累積15分鐘，進步會非常明顯。
+4,黃品妍,45678,86,91,75,78,88,5級分,100%,全勤,嘉獎3次,國立蘭陽女中,品妍學習態度認真負責，筆記整理得井然有序。數學幾何與理化計算題若有卡關，歡迎隨時下課找老師討論喔！
+5,吳承恩,56789,81,79,84,85,83,5級分,98%,全勤,嘉獎1次,國立宜蘭高中,承恩五科發展相當均衡，沒有明顯偏科，是穩定度很高的選手！接下來衝刺期只要針對錯題本反覆訂正即可。
+6,李采潔,67890,89,85,68,74,86,5級分,92%,病假2節,嘉獎2次,國立蘭陽女中,采潔在國文與社會科掌握度佳，數學科基礎觀念有抓到，但計算粗心較可惜，建議考前每天算5題維持手感！
+7,王柏翰,11223,68,65,92,89,74,4級分,90%,全勤,嘉獎1次,國立羅東高工,柏翰的數學與自然實力名列班上前茅！只要把背誦科目的基本題分把握住，總積分會大幅往上跳升喔！
+8,游雅筑,33445,94,92,90,88,91,5級分,100%,全勤,小功1次,國立宜蘭高中,雅筑自律性極高，各科皆維持在A級水準，同時熱心協助同學解題，是901班的學習楷模！
+9,簡宇恩,55667,73,82,77,72,80,4級分,94%,全勤,嘉獎1次,國立頭城家商,宇恩近期英文科進步幅度很大！自然科的化學反應式與電學單元可以搭配圖卡複習，會更容易融會貫通。
+10,潘心妤,77889,84,87,79,83,85,5級分,100%,全勤,嘉獎2次,國立蘭陽女中,心妤上課眼神專注、作業準時且字跡工整，各科都在班級平均之上，保持這份步調繼續前進！`;
+
+        let classStudents = [];
+        let allHeaders = [];
+        let scoreSubjectColumns = [];
+        let metadataColumns = [];
+        let currentStudent = null;
+        let selectedDistSubject = "";
+        let radarChartInstance = null;
+        let distChartInstance = null;
+
+        // Recognized keywords for identifying numeric score columns vs metadata columns
+        const EXCLUDE_FROM_SUBJECTS = [
+            '座號', '學號', '姓名', '學生姓名', '身分證', '身份證', '身分證後五碼', '身份證後五碼',
+            '密碼', '後五碼', '班級', '排名', '班排', '校排', '名次', '總分', '平均', '總平均',
+            '級分', '寫作', '作文', '缺曠', '獎懲', '評語', '備註', '完成率', '目標', '志願'
+        ];
+
+        function buildGoogleSheetCsvUrl(rawUrl) {
+            const url = (rawUrl || "").trim();
+            if (!url) return "";
+
+            // Already a published CSV or gviz CSV link
+            if (url.includes("output=csv") || url.includes("tqx=out:csv")) {
+                return url;
+            }
+
+            // Standard Google Sheets link: extract spreadsheet ID and optional gid
+            const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            if (idMatch && idMatch[1]) {
+                const sheetId = idMatch[1];
+                const gidMatch = url.match(/[#&?]gid=([0-9]+)/);
+                const gidParam = gidMatch ? `&gid=${gidMatch[1]}` : "";
+                return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv${gidParam}`;
+            }
+            return url;
+        }
+
+        // Robust CSV / TSV parser supporting quoted fields and newlines inside quotes
+        function parseDelimitedText(text) {
+            const cleanText = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+            if (!cleanText) return [];
+
+            // Detect whether tab or comma is the primary delimiter on the first line
+            const firstLine = cleanText.split("\n")[0];
+            const tabCount = (firstLine.match(/\t/g) || []).length;
+            const commaCount = (firstLine.match(/,/g) || []).length;
+            const delimiter = tabCount > commaCount ? "\t" : ",";
+
+            const rows = [];
+            let currentRow = [];
+            let currentVal = "";
+            let inQuotes = false;
+
+            for (let i = 0; i < cleanText.length; i++) {
+                const char = cleanText[i];
+                const nextChar = cleanText[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        currentVal += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === delimiter && !inQuotes) {
+                    currentRow.push(currentVal.trim());
+                    currentVal = "";
+                } else if (char === "\n" && !inQuotes) {
+                    currentRow.push(currentVal.trim());
+                    if (currentRow.some(cell => cell !== "")) {
+                        rows.push(currentRow);
+                    }
+                    currentRow = [];
+                    currentVal = "";
+                } else {
+                    currentVal += char;
+                }
+            }
+            currentRow.push(currentVal.trim());
+            if (currentRow.some(cell => cell !== "")) {
+                rows.push(currentRow);
+            }
+            return rows;
+        }
+
+        function processSpreadsheetRows(rows, isLiveSheet = false) {
+            if (!rows || rows.length < 2) return false;
+
+            // Find the header row (first row containing 姓名 or 學生)
+            let headerIdx = 0;
+            for (let i = 0; i < Math.min(rows.length, 5); i++) {
+                if (rows[i].some(cell => cell.includes("姓名") || cell.includes("學生"))) {
+                    headerIdx = i;
+                    break;
+                }
+            }
+
+            const rawHeaders = rows[headerIdx].map((h, idx) => h || `欄位${idx + 1}`);
+            const nameColIdx = rawHeaders.findIndex(h => h.includes("姓名") || h.includes("學生"));
+            const idColIdx = rawHeaders.findIndex(h =>
+                h.includes("後五碼") || h.includes("身分證") || h.includes("身份證") || h.includes("密碼") || h.toLowerCase().includes("id")
+            );
+            const seatColIdx = rawHeaders.findIndex(h => h.includes("座號") || h.includes("編號"));
+
+            if (nameColIdx === -1) {
+                showToast("⚠️ 找不到「姓名」欄位，請確認試算表第一列包含「姓名」！");
+                return false;
+            }
+
+            // Filter out summary/distribution rows at the bottom of spreadsheets (e.g. 平均, 組距, 100分, 90-99, 最高分)
+            const nonStudentKeywords = ["平均", "組距", "最高", "最低", "標準差", "人數", "100分", "90-99", "80-89", "70-79", "60-69", "未滿", "不及格", "合計", "總計"];
+            const studentRows = [];
+
+            for (let r = headerIdx + 1; r < rows.length; r++) {
+                const row = rows[r];
+                const studentName = (row[nameColIdx] || "").trim();
+                if (!studentName) continue;
+                if (nonStudentKeywords.some(kw => studentName.includes(kw))) continue;
+                studentRows.push(row);
+            }
+
+            if (studentRows.length === 0) return false;
+
+            // Identify which columns are numeric 0-100 subject scores
+            const detectedSubjects = [];
+            const detectedMeta = [];
+
+            rawHeaders.forEach((headerName, colIdx) => {
+                if (colIdx === nameColIdx || colIdx === idColIdx) return;
+
+                const isExcludedKeyword = EXCLUDE_FROM_SUBJECTS.some(kw => headerName.includes(kw));
+                if (isExcludedKeyword) {
+                    detectedMeta.push({ name: headerName, index: colIdx });
+                    return;
+                }
+
+                // Check if at least 60% of students have a numeric value between 0 and 100 in this column
+                let numericCount = 0;
+                let validSampleCount = 0;
+                studentRows.forEach(row => {
+                    const valStr = (row[colIdx] || "").replace(/分/g, "").trim();
+                    if (valStr !== "") {
+                        validSampleCount++;
+                        const num = Number(valStr);
+                        if (!isNaN(num) && num >= 0 && num <= 105) {
+                            numericCount++;
+                        }
+                    }
+                });
+
+                if (validSampleCount > 0 && (numericCount / validSampleCount) >= 0.6) {
+                    detectedSubjects.push({ name: headerName, index: colIdx });
+                } else {
+                    detectedMeta.push({ name: headerName, index: colIdx });
+                }
+            });
+
+            allHeaders = rawHeaders;
+            scoreSubjectColumns = detectedSubjects;
+            metadataColumns = detectedMeta;
+
+            // Build student objects
+            classStudents = studentRows.map((row, idx) => {
+                const name = (row[nameColIdx] || "").trim();
+                const rawId = idColIdx !== -1 ? String(row[idColIdx] || "").trim() : "12345";
+                // Extract last 5 characters if full ID was entered in sheet
+                const idLast5 = rawId.length >= 5 ? rawId.slice(-5) : rawId.padStart(5, "0");
+                const seat = seatColIdx !== -1 && row[seatColIdx] ? String(row[seatColIdx]).trim() : String(idx + 1);
+
+                const scores = {};
+                scoreSubjectColumns.forEach(subj => {
+                    const rawVal = (row[subj.index] || "").replace(/分/g, "").trim();
+                    const num = rawVal !== "" && !isNaN(Number(rawVal)) ? Number(rawVal) : null;
+                    scores[subj.name] = num;
+                });
+
+                const allFields = {};
+                rawHeaders.forEach((h, cIdx) => {
+                    if (cIdx === idColIdx) return; // Hide password/ID from display cards for security
+                    allFields[h] = row[cIdx] !== undefined && row[cIdx] !== "" ? row[cIdx] : "—";
+                });
+
+                return {
+                    seat,
+                    name,
+                    idLast5,
+                    scores,
+                    allFields
+                };
+            });
+
+            selectedDistSubject = scoreSubjectColumns.length > 0 ? scoreSubjectColumns[0].name : "";
+            populateLoginDropdown(isLiveSheet);
+            return true;
+        }
+
+        function calculateSubjectStats(subjectName) {
+            const validScores = classStudents
+                .map(s => s.scores[subjectName])
+                .filter(v => v !== null && !isNaN(v));
+
+            const count = validScores.length;
+            if (count === 0) {
+                return {
+                    avg: 0, max: 0, min: 0, stdDev: 1, q75: 0, count: 0,
+                    intervals: [
+                        { label: "100分", min: 100, max: 100, count: 0 },
+                        { label: "90-99分", min: 90, max: 99.99, count: 0 },
+                        { label: "80-89分", min: 80, max: 89.99, count: 0 },
+                        { label: "70-79分", min: 70, max: 79.99, count: 0 },
+                        { label: "60-69分", min: 60, max: 69.99, count: 0 },
+                        { label: "未滿60分", min: 0, max: 59.99, count: 0 }
+                    ]
+                };
+            }
+
+            const sum = validScores.reduce((a, b) => a + b, 0);
+            const avg = sum / count;
+            const max = Math.max(...validScores);
+            const min = Math.min(...validScores);
+
+            // Standard deviation for Z-score / T-score analysis
+            const variance = validScores.reduce((acc, v) => acc + Math.pow(v - avg, 2), 0) / count;
+            const stdDev = Math.sqrt(variance) || 1;
+
+            // Top 25% threshold (前標)
+            const sortedAsc = [...validScores].sort((a, b) => a - b);
+            const q75Index = Math.floor((sortedAsc.length - 1) * 0.75);
+            const q75 = sortedAsc[q75Index];
+
+            // Auto-calculate grade distribution headcount (solves spreadsheet formula loss!)
+            const intervals = [
+                { label: "100分", min: 100, max: 105, count: 0, color: "#FDA4AF" },
+                { label: "90-99分", min: 90, max: 99.99, count: 0, color: "#FDE047" },
+                { label: "80-89分", min: 80, max: 89.99, count: 0, color: "#86EFAC" },
+                { label: "70-79分", min: 70, max: 79.99, count: 0, color: "#93C5FD" },
+                { label: "60-69分", min: 60, max: 69.99, count: 0, color: "#D8B4FE" },
+                { label: "未滿60分", min: -99, max: 59.99, count: 0, color: "#FCA5A5" }
+            ];
+
+            validScores.forEach(score => {
+                for (const bucket of intervals) {
+                    if (score >= bucket.min && score <= bucket.max) {
+                        bucket.count++;
+                        break;
+                    }
+                }
+            });
+
+            return {
+                avg: Number(avg.toFixed(1)),
+                max,
+                min,
+                stdDev,
+                q75: Number(q75.toFixed(1)),
+                count,
+                intervals
+            };
+        }
+
+        function getIntervalIndexForScore(score) {
+            if (score === null || isNaN(score)) return -1;
+            if (score >= 100) return 0;
+            if (score >= 90) return 1;
+            if (score >= 80) return 2;
+            if (score >= 70) return 3;
+            if (score >= 60) return 4;
+            return 5;
+        }
+
+        // Estimate Junior High Exam Level (會考等第模擬參考)
+        function estimateCapLevel(score, stats) {
+            if (score === null || isNaN(score)) return { code: "—", label: "未登錄", bg: "bg-stone-100 text-stone-600" };
+            const tScore = 50 + 10 * ((score - stats.avg) / stats.stdDev);
+            if (score >= 95 || tScore >= 62) return { code: "A++", label: "精熟頂尖", bg: "bg-rose-100 text-rose-800 border-rose-200" };
+            if (score >= 90 || tScore >= 58) return { code: "A+", label: "精熟進階", bg: "bg-pink-100 text-pink-800 border-pink-200" };
+            if (score >= 85 || tScore >= 54) return { code: "A", label: "精熟達標", bg: "bg-amber-100 text-amber-800 border-amber-200" };
+            if (score >= 78 || tScore >= 49) return { code: "B++", label: "基礎前段", bg: "bg-emerald-100 text-emerald-800 border-emerald-200" };
+            if (score >= 70 || tScore >= 44) return { code: "B+", label: "基礎中段", bg: "bg-sky-100 text-sky-800 border-sky-200" };
+            if (score >= 60) return { code: "B", label: "基礎達標", bg: "bg-purple-100 text-purple-800 border-purple-200" };
+            return { code: "C", label: "待加強輔導", bg: "bg-orange-100 text-orange-800 border-orange-200" };
+        }
+
+        function populateLoginDropdown(isLiveSheet) {
+            const select = document.getElementById("studentSelect");
+            select.innerHTML = `<option value="">-- 請選擇 901 班學生姓名（共 ${classStudents.length} 位） --</option>`;
+
+            classStudents.forEach((student, idx) => {
+                const opt = document.createElement("option");
+                opt.value = idx;
+                opt.textContent = `${student.seat.padStart(2, "0")}號 - ${student.name}`;
+                select.appendChild(opt);
+            });
+
+            // Sync status badge
+            const badgeText = document.getElementById("syncStatusText");
+            const demoBox = document.getElementById("demoQuickBox");
+            if (isLiveSheet) {
+                badgeText.textContent = `已即時連動 Google 試算表 (${classStudents.length}人)`;
+                demoBox.classList.add("hidden");
+            } else {
+                badgeText.textContent = `901班範例資料模式 (${classStudents.length}人)`;
+                demoBox.classList.remove("hidden");
+                renderDemoAccountPills();
+            }
+        }
+
+        function renderDemoAccountPills() {
+            const container = document.getElementById("demoAccountPills");
+            container.innerHTML = "";
+            classStudents.slice(0, 5).forEach((st, idx) => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-macaron-yellow/70 text-stone-700 border border-amber-200 transition";
+                btn.textContent = `${st.seat}號 ${st.name} (${st.idLast5})`;
+                btn.onclick = () => {
+                    document.getElementById("studentSelect").value = idx;
+                    document.getElementById("idLast5Input").value = st.idLast5;
+                    document.getElementById("loginErrorBox").classList.add("hidden");
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById("idLast5Input");
+            input.type = input.type === "password" ? "text" : "password";
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const selectedIdx = document.getElementById("studentSelect").value;
+            const inputCode = document.getElementById("idLast5Input").value.trim();
+            const errorBox = document.getElementById("loginErrorBox");
+
+            if (selectedIdx === "") return;
+            const student = classStudents[Number(selectedIdx)];
+
+            if (student && student.idLast5.toLowerCase() === inputCode.toLowerCase()) {
+                errorBox.classList.add("hidden");
+                currentStudent = student;
+                renderStudentDashboard(student);
+            } else {
+                errorBox.classList.remove("hidden");
+            }
+        }
+
+        function resetToLogin() {
+            currentStudent = null;
+            document.getElementById("dashboardView").classList.add("hidden");
+            document.getElementById("loginView").classList.remove("hidden");
+            document.getElementById("logoutBtn").classList.add("hidden");
+            document.getElementById("idLast5Input").value = "";
+            document.getElementById("loginErrorBox").classList.add("hidden");
+        }
+
+        function renderStudentDashboard(student) {
+            document.getElementById("loginView").classList.add("hidden");
+            document.getElementById("dashboardView").classList.remove("hidden");
+            document.getElementById("logoutBtn").classList.remove("hidden");
+
+            document.getElementById("studentSeatBadge").textContent = String(student.seat).padStart(2, "0");
+            document.getElementById("studentNameTitle").textContent = student.name;
+
+            // Find teacher comment if present
+            const commentKey = Object.keys(student.allFields).find(k => k.includes("評語") || k.includes("備註") || k.includes("叮嚀"));
+            const commentVal = commentKey ? student.allFields[commentKey] : "";
+            document.getElementById("studentCommentPreview").textContent = commentVal && commentVal !== "—"
+                ? `💬 導師溫暖叮嚀：「${commentVal}」`
+                : "🌱 歡迎查閱本次定期評量各科成績、全班組距落點與個人化學習優勢診斷！";
+
+            // Calculate student's total & average across score subjects
+            const validSubjs = scoreSubjectColumns.filter(s => student.scores[s.name] !== null);
+            const totalScore = validSubjs.reduce((acc, s) => acc + student.scores[s.name], 0);
+            const avgScore = validSubjs.length > 0 ? (totalScore / validSubjs.length).toFixed(1) : "0.0";
+
+            // Calculate class average of averages
+            const classAvgTotal = scoreSubjectColumns.reduce((acc, s) => acc + calculateSubjectStats(s.name).avg, 0);
+            const classOverallAvg = scoreSubjectColumns.length > 0 ? (classAvgTotal / scoreSubjectColumns.length).toFixed(1) : "0.0";
+            const diffFromClass = (Number(avgScore) - Number(classOverallAvg)).toFixed(1);
+
+            // Count subjects above class average
+            let aboveAvgCount = 0;
+            scoreSubjectColumns.forEach(s => {
+                const stScore = student.scores[s.name];
+                const stStats = calculateSubjectStats(s.name);
+                if (stScore !== null && stScore >= stStats.avg) aboveAvgCount++;
+            });
+
+            // Render Top 4 KPI Cards
+            const kpiGrid = document.getElementById("kpiSummaryGrid");
+            kpiGrid.innerHTML = `
+                <div class="rounded-2xl bg-macaron-pink/35 border border-rose-200/80 p-4">
+                    <div class="text-xs font-bold text-rose-800">🌸 各科總分合計</div>
+                    <div class="text-2xl sm:text-3xl font-black text-macaron-soil mt-1">${totalScore} <span class="text-xs font-bold text-stone-500">分</span></div>
+                    <div class="text-[11px] text-stone-500 mt-1">共採計 ${validSubjs.length} 個考科</div>
+                </div>
+                <div class="rounded-2xl bg-macaron-yellow/50 border border-amber-200/80 p-4">
+                    <div class="text-xs font-bold text-amber-900">⭐ 個人總平均</div>
+                    <div class="text-2xl sm:text-3xl font-black text-macaron-soil mt-1">${avgScore} <span class="text-xs font-bold text-stone-500">分</span></div>
+                    <div class="text-[11px] font-bold ${Number(diffFromClass) >= 0 ? 'text-emerald-700' : 'text-amber-700'} mt-1">
+                        班級總平均 ${classOverallAvg} 分 (${Number(diffFromClass) >= 0 ? '+' + diffFromClass : diffFromClass})
+                    </div>
+                </div>
+                <div class="rounded-2xl bg-macaron-mint/50 border border-emerald-200/80 p-4">
+                    <div class="text-xs font-bold text-emerald-900">🌱 超越班平均科目</div>
+                    <div class="text-2xl sm:text-3xl font-black text-macaron-soil mt-1">${aboveAvgCount} <span class="text-xs font-bold text-stone-500">/ ${scoreSubjectColumns.length} 科</span></div>
+                    <div class="text-[11px] text-stone-500 mt-1">穩定維持優勢表現</div>
+                </div>
+                <div class="rounded-2xl bg-macaron-blue/45 border border-sky-200/80 p-4">
+                    <div class="text-xs font-bold text-sky-900">📊 全班統計樣本</div>
+                    <div class="text-2xl sm:text-3xl font-black text-macaron-soil mt-1">${classStudents.length} <span class="text-xs font-bold text-stone-500">位同學</span></div>
+                    <div class="text-[11px] text-stone-500 mt-1">組距人數已即時重算完畢</div>
+                </div>
+            `;
+
+            renderSubjectScoreCards(student);
+            renderRadarChart(student);
+            renderDistributionSection(student, selectedDistSubject || (scoreSubjectColumns[0] && scoreSubjectColumns[0].name));
+            renderStrengthsAndWeaknesses(student);
+            renderAllSpreadsheetFields(student);
+            renderFullDistributionMatrix(student);
+        }
+
+        function renderSubjectScoreCards(student) {
+            const container = document.getElementById("subjectScoreCards");
+            container.innerHTML = "";
+
+            const palette = [
+                { bg: "bg-rose-50/70", border: "border-rose-200", bar: "bg-rose-400", badge: "bg-rose-100 text-rose-800" },
+                { bg: "bg-amber-50/70", border: "border-amber-200", bar: "bg-amber-400", badge: "bg-amber-100 text-amber-800" },
+                { bg: "bg-emerald-50/70", border: "border-emerald-200", bar: "bg-emerald-400", badge: "bg-emerald-100 text-emerald-800" },
+                { bg: "bg-sky-50/70", border: "border-sky-200", bar: "bg-sky-400", badge: "bg-sky-100 text-sky-800" },
+                { bg: "bg-purple-50/70", border: "border-purple-200", bar: "bg-purple-400", badge: "bg-purple-100 text-purple-800" }
+            ];
+
+            scoreSubjectColumns.forEach((subj, idx) => {
+                const score = student.scores[subj.name];
+                const stats = calculateSubjectStats(subj.name);
+                const theme = palette[idx % palette.length];
+                const bucketIdx = getIntervalIndexForScore(score);
+                const bucketInfo = bucketIdx !== -1 ? stats.intervals[bucketIdx] : null;
+                const capLevel = estimateCapLevel(score, stats);
+                const diff = score !== null ? (score - stats.avg).toFixed(1) : null;
+
+                const card = document.createElement("div");
+                card.className = `rounded-2xl ${theme.bg} border-2 ${theme.border} p-4 cursor-pointer hover:shadow-md transition relative`;
+                card.onclick = () => {
+                    selectedDistSubject = subj.name;
+                    renderDistributionSection(student, subj.name);
+                };
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-base font-black text-macaron-soil">${subj.name}</span>
+                        <span class="text-xs font-black px-2.5 py-0.5 rounded-full border ${capLevel.bg}">
+                            參考等第 ${capLevel.code} (${capLevel.label})
+                        </span>
+                    </div>
+                    <div class="flex items-baseline justify-between my-2">
+                        <div>
+                            <span class="text-3xl font-black text-macaron-soil">${score !== null ? score : "—"}</span>
+                            <span class="text-xs font-bold text-stone-500">分</span>
+                        </div>
+                        <div class="text-right text-xs">
+                            <span class="font-bold ${diff >= 0 ? 'text-emerald-700' : 'text-rose-600'}">
+                                ${diff !== null ? (diff >= 0 ? `高於班平均 +${diff}` : `低於班平均 ${diff}`) : ""}
+                            </span>
+                            <div class="text-stone-400">班平均 ${stats.avg} ｜ 最高 ${stats.max}</div>
+                        </div>
+                    </div>
+                    <!-- Score Progress Bar -->
+                    <div class="w-full h-2.5 bg-white/80 rounded-full overflow-hidden border border-stone-200/60 my-2">
+                        <div class="h-full ${theme.bar} rounded-full transition-all duration-500" style="width: ${Math.min(100, Math.max(5, score || 0))}%"></div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs mt-2 pt-2 border-t border-white/80">
+                        <span class="text-stone-600 font-bold">📍 所屬組距：${bucketInfo ? bucketInfo.label : "未分類"}</span>
+                        <span class="font-black px-2 py-0.5 rounded-lg bg-white text-stone-700 border border-stone-200">
+                            同區間共 ${bucketInfo ? bucketInfo.count : 0} 人
+                        </span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderRadarChart(student) {
+            const ctx = document.getElementById("radarChartCanvas").getContext("2d");
+            if (radarChartInstance) radarChartInstance.destroy();
+
+            const labels = scoreSubjectColumns.map(s => s.name);
+            const studentData = scoreSubjectColumns.map(s => student.scores[s.name] || 0);
+            const avgData = scoreSubjectColumns.map(s => calculateSubjectStats(s.name).avg);
+            const q75Data = scoreSubjectColumns.map(s => calculateSubjectStats(s.name).q75);
+
+            radarChartInstance = new Chart(ctx, {
+                type: "radar",
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: `${student.name} 的成績`,
+                            data: studentData,
+                            backgroundColor: "rgba(232, 111, 136, 0.25)",
+                            borderColor: "#E86F88",
+                            pointBackgroundColor: "#E86F88",
+                            borderWidth: 2.5
+                        },
+                        {
+                            label: "901 班級前標 (前25%)",
+                            data: q75Data,
+                            backgroundColor: "rgba(56, 161, 105, 0.08)",
+                            borderColor: "#38A169",
+                            borderDash: [4, 4],
+                            pointBackgroundColor: "#38A169",
+                            borderWidth: 1.5
+                        },
+                        {
+                            label: "901 班級平均",
+                            data: avgData,
+                            backgroundColor: "rgba(74, 137, 220, 0.10)",
+                            borderColor: "#4A89DC",
+                            pointBackgroundColor: "#4A89DC",
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 40,
+                            max: 100,
+                            ticks: { stepSize: 20, backdropColor: "transparent", font: { size: 10 } },
+                            pointLabels: { font: { size: 13, weight: "bold", family: "'Zen Maru Gothic', sans-serif" }, color: "#4A403A" }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: { boxWidth: 12, font: { size: 11, weight: "bold" } }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById("radarLegendNote").innerHTML = `
+                🌟 <b>圖表解讀小幫手：</b>粉紅實線為 <b>${student.name}</b> 的成績；若粉紅線超出藍色線代表高於班級平均，超出綠色虛線則代表該科已達 <b>901班前標（前25%）</b> 水準！
+            `;
+        }
+
+        function renderDistributionSection(student, subjectName) {
+            if (!subjectName) return;
+            selectedDistSubject = subjectName;
+
+            // Render Subject Tabs
+            const tabsContainer = document.getElementById("distSubjectTabs");
+            tabsContainer.innerHTML = "";
+            scoreSubjectColumns.forEach(subj => {
+                const isSelected = subj.name === subjectName;
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = isSelected
+                    ? "px-3.5 py-1.5 rounded-xl bg-macaron-soil text-white font-black text-xs shadow-sm transition"
+                    : "px-3.5 py-1.5 rounded-xl bg-amber-50 hover:bg-macaron-yellow/70 text-stone-700 font-bold text-xs border border-amber-200 transition";
+                btn.textContent = `${subj.name} (${student.scores[subj.name] ?? "—"}分)`;
+                btn.onclick = () => renderDistributionSection(student, subj.name);
+                tabsContainer.appendChild(btn);
+            });
+
+            const stats = calculateSubjectStats(subjectName);
+            const studentScore = student.scores[subjectName];
+            const studentBucketIdx = getIntervalIndexForScore(studentScore);
+
+            // Render Bar Chart
+            const ctx = document.getElementById("distributionChartCanvas").getContext("2d");
+            if (distChartInstance) distChartInstance.destroy();
+
+            const labels = stats.intervals.map((b, idx) =>
+                idx === studentBucketIdx ? `★ ${b.label} (落點)` : b.label
+            );
+            const dataCounts = stats.intervals.map(b => b.count);
+            const bgColors = stats.intervals.map((b, idx) =>
+                idx === studentBucketIdx ? "#E86F88" : "rgba(198, 226, 255, 0.75)"
+            );
+            const borderColors = stats.intervals.map((b, idx) =>
+                idx === studentBucketIdx ? "#BE123C" : "#4A89DC"
+            );
+
+            distChartInstance = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels,
+                    datasets: [{
+                        label: `${subjectName} 組距人數 (人)`,
+                        data: dataCounts,
+                        backgroundColor: bgColors,
+                        borderColor: borderColors,
+                        borderWidth: 2,
+                        borderRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, precision: 0 },
+                            title: { display: true, text: "班級人數 (人)", font: { size: 11, weight: "bold" } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // Update bottom 6 interval cards
+            document.getElementById("distTableTitle").textContent = `【${subjectName}】全班組距人數明細表（班平均：${stats.avg}分）`;
+            document.getElementById("distStudentPositionText").textContent = studentScore !== null
+                ? `🌷 ${student.name} 考 ${studentScore} 分，位於「${stats.intervals[studentBucketIdx].label}」區間`
+                : "";
+
+            const boxesContainer = document.getElementById("distIntervalBoxes");
+            boxesContainer.innerHTML = "";
+            stats.intervals.forEach((bucket, idx) => {
+                const isHere = idx === studentBucketIdx;
+                const box = document.createElement("div");
+                box.className = isHere
+                    ? "rounded-2xl bg-macaron-pink border-2 border-rose-500 p-2.5 shadow-sm transform -translate-y-0.5 transition"
+                    : "rounded-2xl bg-stone-50 border border-stone-200 p-2.5";
+                box.innerHTML = `
+                    <div class="text-[11px] font-bold ${isHere ? 'text-rose-900' : 'text-stone-500'}">${bucket.label}</div>
+                    <div class="text-lg font-black ${isHere ? 'text-rose-900' : 'text-macaron-soil'} mt-0.5">${bucket.count} <span class="text-xs font-normal">人</span></div>
+                    ${isHere ? `<div class="text-[10px] font-black text-white bg-rose-500 rounded-full px-1.5 py-0.5 mt-1 inline-block">★ 孩子落點</div>` : `<div class="text-[10px] text-stone-400 mt-1">佔 ${Math.round((bucket.count / Math.max(1, stats.count)) * 100)}%</div>`}
+                `;
+                boxesContainer.appendChild(box);
+            });
+        }
+
+        function renderStrengthsAndWeaknesses(student) {
+            const evaluated = scoreSubjectColumns.map(subj => {
+                const score = student.scores[subj.name];
+                const stats = calculateSubjectStats(subj.name);
+                const diff = score !== null ? score - stats.avg : 0;
+                const zScore = score !== null ? (score - stats.avg) / stats.stdDev : 0;
+                const tScore = Math.round(50 + 10 * zScore);
+                return {
+                    name: subj.name,
+                    score: score ?? 0,
+                    avg: stats.avg,
+                    diff: Number(diff.toFixed(1)),
+                    tScore: Math.max(20, Math.min(80, tScore))
+                };
+            });
+
+            const sortedByT = [...evaluated].sort((a, b) => b.tScore - a.tScore);
+            const bestSubj = sortedByT[0];
+            const secondBest = sortedByT[1] || sortedByT[0];
+            const weakestSubj = sortedByT[sortedByT.length - 1];
+
+            const grid = document.getElementById("strengthsWeaknessesGrid");
+            grid.innerHTML = `
+                <!-- Red Pikmin: Top Advantage -->
+                <div class="rounded-2xl bg-rose-50/80 border-2 border-rose-200 p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-black px-2.5 py-1 rounded-full bg-macaron-pink text-rose-900">🔥 核心領航優勢科目</span>
+                            <span class="text-xs font-bold text-rose-700">T指數 ${bestSubj.tScore}</span>
+                        </div>
+                        <h4 class="text-xl font-black text-macaron-soil">${bestSubj.name}（${bestSubj.score}分）</h4>
+                        <p class="text-xs text-stone-600 mt-2 leading-relaxed">
+                            在班級相對表現中，<b>${bestSubj.name}</b> 是孩子最具競爭力的強項（${bestSubj.diff >= 0 ? `高於班平均 +${bestSubj.diff} 分` : `表現最為穩定`}），同時帶動 <b>${secondBest.name}</b> 一起成長！
+                        </p>
+                    </div>
+                    <div class="mt-3 pt-2.5 border-t border-rose-200/60 text-[11px] font-bold text-rose-800">
+                        💡 建議：可挑戰歷屆會考進階題或擔任小老師，深化精熟度！
+                    </div>
+                </div>
+
+                <!-- Blue Pikmin: Relative Weakness / Potential -->
+                <div class="rounded-2xl bg-sky-50/80 border-2 border-sky-200 p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-black px-2.5 py-1 rounded-full bg-macaron-blue text-sky-900">💧 最具進步潛力科目</span>
+                            <span class="text-xs font-bold text-sky-700">T指數 ${weakestSubj.tScore}</span>
+                        </div>
+                        <h4 class="text-xl font-black text-macaron-soil">${weakestSubj.name}（${weakestSubj.score}分）</h4>
+                        <p class="text-xs text-stone-600 mt-2 leading-relaxed">
+                            相較於其他科目，<b>${weakestSubj.name}</b> 目前距離班級平均（${weakestSubj.avg}分）還有成長空間，也是下一階段投資報酬率最高的突破口！
+                        </p>
+                    </div>
+                    <div class="mt-3 pt-2.5 border-t border-sky-200/60 text-[11px] font-bold text-sky-900">
+                        💡 建議：優先釐清課本基礎觀念與錯題訂正，不必急於刷難題。
+                    </div>
+                </div>
+
+                <!-- Yellow Pikmin: Overall Learning Strategy -->
+                <div class="rounded-2xl bg-amber-50/80 border-2 border-amber-200 p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-black px-2.5 py-1 rounded-full bg-macaron-yellow text-amber-900">⚡ 九年級學習配速建議</span>
+                            <span class="text-xs font-bold text-amber-800">親師共育</span>
+                        </div>
+                        <h4 class="text-xl font-black text-macaron-soil">
+                            ${(bestSubj.tScore - weakestSubj.tScore) <= 10 ? "五科均衡穩健型" : "優勢突出專長型"}
+                        </h4>
+                        <p class="text-xs text-stone-600 mt-2 leading-relaxed">
+                            ${(bestSubj.tScore - weakestSubj.tScore) <= 10
+                                ? `孩子的各科發展相當平均（高低T分差僅 ${bestSubj.tScore - weakestSubj.tScore}），在國中會考積分制中非常吃香，只要減少非必要粗心即可全面晉級！`
+                                : `孩子具有鮮明的強項科目（${bestSubj.name}），建議每天保留 20 分鐘給 ${weakestSubj.name} 穩固基礎題（B++ 升 A 的關鍵），總積分將大幅躍進！`
+                            }
+                        </p>
+                    </div>
+                    <div class="mt-3 pt-2.5 border-t border-amber-200/60 text-[11px] font-bold text-amber-900">
+                        💡 鼓勵孩子：看見自己的強項，按部就班補齊小缺口！
+                    </div>
+                </div>
+            `;
+
+            // Render horizontal T-score bars
+            const barsContainer = document.getElementById("relativeStrengthBars");
+            barsContainer.innerHTML = "";
+            sortedByT.forEach(item => {
+                const isStrong = item.tScore >= 50;
+                const widthPct = Math.min(100, Math.max(15, ((item.tScore - 20) / 60) * 100));
+                const row = document.createElement("div");
+                row.className = "flex items-center gap-3 text-xs";
+                row.innerHTML = `
+                    <div class="w-16 font-black text-macaron-soil shrink-0">${item.name}</div>
+                    <div class="flex-grow bg-stone-100 h-4 rounded-full overflow-hidden relative border border-stone-200">
+                        <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-stone-400 z-10" title="班平均基準線 (50)"></div>
+                        <div class="h-full ${isStrong ? 'bg-gradient-to-r from-macaron-mint to-emerald-400' : 'bg-gradient-to-r from-macaron-peach to-amber-300'} rounded-full" style="width: ${widthPct}%"></div>
+                    </div>
+                    <div class="w-32 text-right font-bold text-stone-600 shrink-0">
+                        指數 <span class="font-black text-macaron-soil">${item.tScore}</span> (${item.diff >= 0 ? '+' + item.diff : item.diff})
+                    </div>
+                `;
+                barsContainer.appendChild(row);
+            });
+        }
+
+        function renderAllSpreadsheetFields(student) {
+            const container = document.getElementById("allSpreadsheetFieldsGrid");
+            container.innerHTML = "";
+            const entries = Object.entries(student.allFields);
+            document.getElementById("totalColumnsBadge").textContent = `共載入 ${entries.length} 個試算表欄位`;
+
+            entries.forEach(([key, val]) => {
+                const isLongText = String(val).length > 18;
+                const item = document.createElement("div");
+                item.className = `${isLongText ? 'sm:col-span-2 lg:col-span-3 bg-amber-50/70 border-amber-200' : 'bg-stone-50/80 border-stone-200'} rounded-2xl border p-3.5 flex flex-col justify-between`;
+                item.innerHTML = `
+                    <div class="text-xs font-bold text-stone-500">${key}</div>
+                    <div class="text-sm sm:text-base font-black text-macaron-soil mt-1 break-words">${val}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function renderFullDistributionMatrix(student) {
+            const tbody = document.getElementById("fullDistributionMatrixBody");
+            tbody.innerHTML = "";
+
+            scoreSubjectColumns.forEach(subj => {
+                const score = student.scores[subj.name];
+                const stats = calculateSubjectStats(subj.name);
+                const studentBucket = getIntervalIndexForScore(score);
+
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-amber-50/40 transition";
+
+                let cellsHtml = `
+                    <td class="py-3 px-3 font-black text-macaron-soil">${subj.name}</td>
+                    <td class="py-3 px-3 text-center font-black text-rose-600">${score ?? "—"}</td>
+                    <td class="py-3 px-3 text-center font-bold text-stone-600">${stats.avg}</td>
+                `;
+
+                stats.intervals.forEach((b, bIdx) => {
+                    const isHere = bIdx === studentBucket;
+                    cellsHtml += `
+                        <td class="py-3 px-3 text-center ${isHere ? 'bg-macaron-pink font-black text-rose-900 rounded-lg' : 'text-stone-600'}">
+                            ${isHere ? `★ ${b.count}人` : `${b.count}人`}
+                        </td>
+                    `;
+                });
+
+                tr.innerHTML = cellsHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openSheetModal() {
+            document.getElementById("sheetModal").classList.remove("hidden");
+            document.getElementById("googleSheetUrlInput").value = CONFIG.GOOGLE_SHEET_URL || "";
+        }
+
+        function closeSheetModal() {
+            document.getElementById("sheetModal").classList.add("hidden");
+        }
+
+        function fillSampleCsvToTextarea() {
+            document.getElementById("rawCsvTextarea").value = DEFAULT_CLASS_901_CSV;
+        }
+
+        function importFromTextarea() {
+            const raw = document.getElementById("rawCsvTextarea").value;
+            const rows = parseDelimitedText(raw);
+            if (processSpreadsheetRows(rows, true)) {
+                closeSheetModal();
+                resetToLogin();
+                showToast("🎉 已成功載入您貼上的試算表資料與組距統計！");
+            }
+        }
+
+        async function connectGoogleSheetFromInput(silentUrl = null) {
+            const rawUrl = silentUrl !== null ? silentUrl : document.getElementById("googleSheetUrlInput").value.trim();
+            const statusBox = document.getElementById("sheetConnectStatus");
+
+            if (!rawUrl) {
+                if (!silentUrl) {
+                    statusBox.className = "mt-3 text-xs font-bold p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 block";
+                    statusBox.textContent = "請先貼上 Google 試算表網址喔！";
+                }
+                return;
+            }
+
+            const csvUrl = buildGoogleSheetCsvUrl(rawUrl);
+            if (!silentUrl) {
+                statusBox.className = "mt-3 text-xs font-bold p-3 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 block";
+                statusBox.textContent = "⏳ 正在連線讀取 Google 試算表資料...";
+            }
+
+            try {
+                const response = await fetch(csvUrl, { cache: "no-store" });
+                if (!response.ok) throw new Error("網路回應不正常");
+                const csvText = await response.text();
+                const rows = parseDelimitedText(csvText);
+
+                if (processSpreadsheetRows(rows, true)) {
+                    CONFIG.GOOGLE_SHEET_URL = rawUrl;
+                    if (!silentUrl) {
+                        statusBox.className = "mt-3 text-xs font-bold p-3 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+                        statusBox.innerHTML = `✅ 連線成功！已自動載入 <b>${classStudents.length} 位學生</b> 與 <b>${scoreSubjectColumns.length} 個考科</b>，組距人數已自動演算完成！`;
+                        showToast("✅ Google 試算表即時連動成功！");
+                    }
+                } else {
+                    throw new Error("格式無法辨識");
+                }
+            } catch (err) {
+                if (!silentUrl) {
+                    statusBox.className = "mt-3 text-xs font-bold p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 block";
+                    statusBox.innerHTML = `⚠️ 無法直接讀取此網址。請確認試算表右上角「共用」已設為<b>「知道連結的任何人可檢視」</b>，或使用「檔案 → 共用 → 發布到網路 → CSV」網址！`;
+                }
+            }
+        }
+
+        function copyFullHtmlWithSheetUrl() {
+            const urlToEmbed = document.getElementById("googleSheetUrlInput").value.trim() || CONFIG.GOOGLE_SHEET_URL;
+            let fullHtml = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            // Replace GOOGLE_SHEET_URL in source code so teacher can paste directly to GitHub
+            fullHtml = fullHtml.replace(
+                /GOOGLE_SHEET_URL:\s*"[^"]*"/,
+                `GOOGLE_SHEET_URL: "${urlToEmbed.replace(/"/g, '\\"')}"`
+            );
+            copyTextToClipboard(fullHtml, "🎉 已複製完整網頁程式碼！現在直接去 GitHub 貼上成 index.html 即可！");
+        }
+
+        function copyParentFeedback() {
+            if (!currentStudent) return;
+            const scoresText = scoreSubjectColumns
+                .map(s => `${s.name}:${currentStudent.scores[s.name] ?? '—'}分`)
+                .join("、");
+            const msg = `【宜蘭縣文化國中901班 成績簽閱回條】\n老師好，我是 ${currentStudent.seat}號 ${currentStudent.name} 的家長，已於「901班學習紀錄小站」查閱孩子本次成績（${scoresText}）與個人化學習分析報告，謝謝老師用心指導！`;
+            copyTextToClipboard(msg, "📋 已複製家長簽閱回條！可直接貼到 LINE 傳給導師喔！");
+        }
+
+        function copyTextToClipboard(text, successMsg) {
+            const temp = document.createElement("textarea");
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand("copy");
+            document.body.removeChild(temp);
+            showToast(successMsg);
+        }
+
+        function showToast(msg) {
+            const box = document.getElementById("toastBox");
+            document.getElementById("toastMessage").textContent = msg;
+            box.classList.remove("hidden");
+            setTimeout(() => box.classList.add("hidden"), 3500);
+        }
+
+        window.onload = function () {
+            // Load default Class 901 dataset first so the page is always ready
+            const initialRows = parseDelimitedText(DEFAULT_CLASS_901_CSV);
+            processSpreadsheetRows(initialRows, false);
+
+            // If teacher has set GOOGLE_SHEET_URL in CONFIG, automatically sync live data!
+            if (CONFIG.GOOGLE_SHEET_URL && CONFIG.GOOGLE_SHEET_URL.trim() !== "") {
+                connectGoogleSheetFromInput(CONFIG.GOOGLE_SHEET_URL.trim());
+            }
+        };
+    </script>
+
+</body></html>
