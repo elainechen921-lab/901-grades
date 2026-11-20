@@ -61,7 +61,15 @@ li{margin:6px 0}
 .bar{display:grid;grid-template-columns:84px 1fr 44px;align-items:center;gap:10px;font-size:15px}
 .bar i{display:block;height:20px;border-radius:5px;background:#d6ded8}
 .bar.me i{background:var(--clay)}.bar.me b{color:var(--clay)}
-.stat em{font-style:normal;font-weight:700;color:var(--clay)}
+.sgrid{display:grid;grid-template-columns:repeat(var(--m,2),1fr);gap:12px}
+@media(min-width:760px){.sgrid{grid-template-columns:repeat(var(--n,5),1fr)}}
+.sc{border:1px solid var(--line);border-radius:14px;padding:14px 14px 10px;background:#fff;text-align:center}
+.sc .nm{font-size:15px;color:var(--mute);font-weight:700;letter-spacing:.15em}
+.sc .gd{font-size:27px;font-weight:800;font-family:"Noto Serif TC",serif;line-height:1.3;margin:2px 0 10px;white-space:nowrap}
+.gd.a{color:var(--good)}.gd.b{color:var(--clay)}.gd.c{color:var(--bad)}
+.sc .kv{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;border-top:1px dashed var(--line);padding:6px 2px}
+.sc .kv span{color:var(--mute)}.sc .kv b{font-size:17px;color:var(--ink)}
+.sc .kv.pt b{color:var(--green)}
 @media print{header.top button,.pick,.noprint{display:none}body{background:#fff}.card{box-shadow:none;break-inside:avoid}}
 </style></head><body>
 <section id="login">
@@ -125,7 +133,7 @@ function render(i) {
     `</table></div><p class="note">數字為全班在該分數區間的人數，◀ 為孩子所在的區間。</p>`;
   $('#out').innerHTML =
     `<div class="card lead">${summary(e, p)}</div>` +
-    `<div class="card"><div class="stats">${stats}</div></div>` +
+    `<div class="card"><h2 class="serif">各科成績概況</h2><div class="sgrid" style="--n:${Math.min(S.length, 5)};--m:${Math.min(S.length, 2)}">${stats}</div></div>` +
     `<div class="card"><h2 class="serif">各科成績</h2>${table}<p class="note">90 分以上以綠色標示，未達 60 分以紅色標示。</p></div>` +
     `<div class="card"><h2 class="serif">各科表現雷達圖</h2>${radar(S)}</div>` +
     `<div class="card"><h2 class="serif">各科組距人數</h2>${dist}</div>` +
@@ -139,8 +147,12 @@ function renderMock(e, p) {
   const U = x => x.unit === '題' ? ' 題' : '', raw = S.some(x => x.unit === '題');
   const Sm = e.summary, hasPts = S.some(x => x.pts !== null);
   const D2 = got.map(x => ({...x, d: x.s - x.avg, beat: Math.round((x.cnt - x.rank) / x.cnt * 100)}));
-  const stats = S.map(x => x.s === null ? `<div class="stat"><span>${x.n}</span><b style="font-size:22px">缺考</b></div>`
-    : `<div class="stat"><span>${x.n}${x.unit === '題' ? '（答對題數）' : '（加權分數）'}</span><b>${x.s}</b><span>等級 <em>${x.grade}</em>　班排名 ${x.rank} / ${x.cnt}</span></div>`).join('');
+  const gcls = g => /A\+*$/.test(g) ? 'a' : /B\+*$/.test(g) ? 'b' : /C$/.test(g) ? 'c' : '';
+  const stats = S.map(x => x.s === null ? `<div class="sc"><div class="nm">${x.n}</div><div class="gd" style="color:var(--mute)">缺考</div></div>`
+    : `<div class="sc"><div class="nm">${x.n}</div><div class="gd ${gcls(x.grade)}">${x.grade}</div>` +
+      `<div class="kv"><span>${x.unit === '題' ? '答對題數' : '加權分數'}</span><b>${x.s}${x.unit === '題' ? ' 題' : ''}</b></div>` +
+      (x.pts !== null ? `<div class="kv pt"><span>積分</span><b>${x.pts}</b></div>` : '') +
+      `<div class="kv"><span>班排名</span><b>${x.rank} / ${x.cnt}</b></div></div>`).join('');
   const chips = !Sm || !Sm.combo ? '' : (() => { const a = Sm.combo.split(/\s*[,，、]\s*/); return a.length === S.length
     ? S.map((x, k) => `<span class="tag tg" style="border-color:#c9d8ce">${x.n} ${a[k]}</span>`).join('') : `<span class="tag tg">${Sm.combo}</span>`; })();
   const sumCard = !Sm ? '' : `<div class="card"><h2 class="serif">五科總覽</h2><div class="stats">` +
@@ -179,7 +191,7 @@ function renderMock(e, p) {
       .filter(([, f]) => hist.some(x => f(x) != null)).map(([t, f]) => `<tr><td><b>${t}</b></td>${hist.map(x => `<td>${f(x) == null ? '—' : f(x)}</td>`).join('')}</tr>`).join('') +
     names.map(n => `<tr><td>${n}</td>${hist.map(x => { const y = x.subjects.find(z => z.n === n); return `<td>${y && y.s !== null ? `${y.s}${U(y)}（${y.grade}）` : '—'}</td>`; }).join('')}</tr>`).join('') + '</table></div>';
   $('#out').innerHTML =
-    `<div class="card lead">${e.name}：${sum}。</div>${sumCard}<div class="card"><div class="stats">${stats}</div></div>` +
+    `<div class="card lead">${e.name}：${sum}。</div>${sumCard}<div class="card"><h2 class="serif">各科成績概況</h2><div class="sgrid" style="--n:${Math.min(S.length, 5)};--m:${Math.min(S.length, 2)}">${stats}</div></div>` +
     `<div class="card"><h2 class="serif">各科成績</h2>${table}</div>` +
     (D2.length >= 3 ? `<div class="card"><h2 class="serif">各科班級相對位置雷達圖</h2>${radar(D2.map(x => ({n: x.n, s: x.beat, avg: 50})), '孩子（贏過同學的％）', '班級中間水準（50％）')}<p class="note">各科單位不同，所以用「贏過多少％的同學」來比較，越靠外圈代表在班上越突出。</p></div>` : '') +
     `<div class="card"><h2 class="serif">全班等級人數</h2>${bars}</div>` +
