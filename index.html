@@ -70,20 +70,26 @@ li{margin:6px 0}
 .sc .kv{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;border-top:1px dashed var(--line);padding:6px 2px}
 .sc .kv span{color:var(--mute)}.sc .kv b{font-size:17px;color:var(--ink)}
 .sc .kv.pt b{color:var(--green)}
+.hg{font-weight:800;font-size:17px;font-family:"Noto Serif TC",serif;line-height:1.3}
+.hg.a{color:var(--good)}.hg.b{color:var(--clay)}.hg.c{color:var(--bad)}.hs{font-size:12.5px;color:var(--mute)}
+@media(max-width:640px){.hist th,.hist td{padding:8px 4px;font-size:14px}.hg{font-size:16px}}
 td.gcell{font-size:19px;font-weight:800;font-family:"Noto Serif TC",serif}
 td.gcell.a{color:var(--good)}td.gcell.b{color:var(--clay)}td.gcell.c{color:var(--bad)}
 @media(max-width:640px){
   .wrap:has(table.rt){overflow:visible}
   table.rt,table.rt tbody{display:block;width:100%}
   table.rt thead{display:none}
-  table.rt tr{display:grid;grid-template-columns:1fr 1fr;column-gap:18px;border:1px solid var(--line);border-radius:12px;margin:10px 0;padding:6px 14px 4px;background:#fff}
+  table.rt tr{display:grid;grid-template-columns:1fr 1fr;column-gap:18px;border:1px solid var(--line);border-radius:12px;margin:10px 0;padding:6px 14px 0;background:#fff;overflow:hidden}
   table.rt td{display:flex;justify-content:space-between;align-items:baseline;text-align:right;border-bottom:1px dashed var(--line);padding:8px 0;white-space:normal;background:none!important}
-  table.rt td.nm,table.rt td.gcell,table.rt td[colspan]{grid-column:1/-1}
-  table.rt td:last-child{border-bottom:0}
+  table.rt td[colspan]{grid-column:1/-1}
+  table.rt td.nm{grid-column:1}
+  table.rt td.gcell{grid-column:2}
+  table.rt td{margin-bottom:-1px}
   table.rt td::before{content:attr(data-label);color:var(--mute);font-weight:400;font-size:14px;text-align:left}
   table.rt td.nm{font-size:19px;font-weight:800;color:var(--green);justify-content:flex-start;font-family:"Noto Serif TC",serif;border-bottom:0;padding-bottom:0}
   table.rt td.nm::before{content:none}
-  table.rt td.gcell{font-size:26px;justify-content:space-between;padding:2px 0 8px}
+  table.rt td.gcell{font-size:28px;justify-content:flex-end;padding:0 0 6px;border-bottom:0;line-height:1.2}
+  table.rt td.gcell::before{content:none}
   table.rt td{display:flex}
 }
 @media print{header.top button,.pick,.noprint{display:none}body{background:#fff}.card{box-shadow:none;break-inside:avoid}}
@@ -161,14 +167,15 @@ function renderMock(e, p) {
   const S = e.subjects, got = S.filter(x => x.s !== null);
   if (e.absent) { $('#out').innerHTML = `<div class="card lead">本次「${e.name}」缺考，沒有成績。</div>`; return; }
   const U = x => x.unit === '題' ? ' 題' : '', raw = S.some(x => x.unit === '題');
-  const Sm = e.summary, hasPts = S.some(x => x.pts !== null);
+  const Sm = e.summary, hasPts = S.some(x => x.pts !== null), hasSr = S.some(x => x.srank !== null);
   const D2 = got.map(x => ({...x, d: x.s - x.avg, beat: Math.round((x.cnt - x.rank) / x.cnt * 100)}));
   const gcls = g => /A\+*$/.test(g) ? 'a' : /B\+*$/.test(g) ? 'b' : /C$/.test(g) ? 'c' : '';
   const stats = S.map(x => x.s === null ? `<div class="sc"><div class="nm">${x.n}</div><div class="gd" style="color:var(--mute)">缺考</div></div>`
     : `<div class="sc"><div class="nm">${x.n}</div><div class="gd ${gcls(x.grade)}">${x.grade}</div>` +
       `<div class="kv"><span>${x.unit === '題' ? '答對題數' : '加權分數'}</span><b>${x.s}${x.unit === '題' ? ' 題' : ''}</b></div>` +
       (x.pts !== null ? `<div class="kv pt"><span>積分</span><b>${x.pts}</b></div>` : '') +
-      `<div class="kv"><span>班排名</span><b>${x.rank} / ${x.cnt}</b></div></div>`).join('');
+      `<div class="kv"><span>班排名</span><b>${x.rank} / ${x.cnt}</b></div>` +
+      (x.srank !== null ? `<div class="kv"><span>校排名</span><b>${x.srank}</b></div>` : '') + `</div>`).join('');
   const chips = !Sm || !Sm.combo ? '' : (() => { const a = Sm.combo.split(/\s*[,，、]\s*/); return a.length === S.length
     ? S.map((x, k) => `<span class="tag tg" style="border-color:#c9d8ce">${x.n} ${a[k]}</span>`).join('') : `<span class="tag tg">${Sm.combo}</span>`; })();
   const sumCard = !Sm ? '' : `<div class="card"><h2 class="serif">五科總覽</h2><div class="stats">` +
@@ -177,9 +184,9 @@ function renderMock(e, p) {
     (Sm.schoolRank !== null ? `<div class="stat"><span>校排名</span><b>${Sm.schoolRank}</b><span>參加康軒模擬考的學生中</span></div>` : '') +
     `<div class="stat"><span>全班最高 / 最低</span><b style="font-size:24px">${Sm.max} / ${Sm.min}</b></div></div>` +
     (chips ? `<p style="margin:14px 0 4px"><b>五科標示組合</b></p><div>${chips}</div>` : '') + `</div>`;
-  const table = `<div class="wrap"><table class="rt"><thead><tr><th>科目</th><th>等級</th><th>成績</th>${hasPts ? '<th>積分</th>' : ''}<th>班平均</th><th>與平均差</th><th>最高</th><th>最低</th><th>班排名</th></tr></thead>` +
-    S.map(x => x.s === null ? `<tr><td class="nm" data-label="科目">${x.n}</td><td colspan="${hasPts ? 8 : 7}">缺考</td></tr>` :
-      `<tr><td class="nm" data-label="科目">${x.n}</td><td class="gcell ${gcls(x.grade)}" data-label="等級">${x.grade}</td><td class="me" data-label="${x.unit === '題' ? '答對題數' : '加權分數'}">${x.s}${U(x)}</td>${hasPts ? `<td class="me" data-label="積分">${x.pts === null ? '—' : x.pts}</td>` : ''}<td data-label="班平均">${x.avg}</td><td class="${cl(x.s - x.avg)}" data-label="與平均差">${sg(x.s - x.avg)}${U(x)}</td><td data-label="最高">${x.max}</td><td data-label="最低">${x.min}</td><td data-label="班排名">${x.rank} / ${x.cnt}</td></tr>`).join('') + '</table></div>' + (raw ? '<p class="note">標示「題」的科目為答對題數，其餘為加權分數。</p>' : '');
+  const table = `<div class="wrap"><table class="rt"><thead><tr><th>科目</th><th>等級</th><th>成績</th>${hasPts ? '<th>積分</th>' : ''}<th>班平均</th><th>與平均差</th><th>最高</th><th>最低</th><th>班排名</th>${hasSr ? '<th>校排名</th>' : ''}</tr></thead>` +
+    S.map(x => x.s === null ? `<tr><td class="nm" data-label="科目">${x.n}</td><td colspan="9">缺考</td></tr>` :
+      `<tr><td class="nm" data-label="科目">${x.n}</td><td class="gcell ${gcls(x.grade)}" data-label="等級">${x.grade}</td><td class="me" data-label="${x.unit === '題' ? '答對題數' : '加權分數'}">${x.s}${U(x)}</td>${hasPts ? `<td class="me" data-label="積分">${x.pts === null ? '—' : x.pts}</td>` : ''}<td data-label="班平均">${x.avg}</td><td class="${cl(x.s - x.avg)}" data-label="與平均差">${sg(x.s - x.avg)}${U(x)}</td><td data-label="最高">${x.max}</td><td data-label="最低">${x.min}</td><td data-label="班排名">${x.rank} / ${x.cnt}</td>${hasSr ? `<td data-label="校排名">${x.srank === null ? '—' : x.srank}</td>` : ''}</tr>`).join('') + '</table></div>' + (raw ? '<p class="note">標示「題」的科目為答對題數，其餘為加權分數。</p>' : '');
   const bars = `<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px">` + S.map(x => {
     const mx = Math.max(...x.grades.map(g => g.n), 1);
     return `<div><b>${x.n}</b><div class="bars" style="margin-top:8px">${x.grades.map(g => `<div class="bar ${g.mine ? 'me' : ''}"><b>${g.g}</b><i style="width:${Math.max(g.n / mx * 100, g.n ? 4 : 0)}%"></i><span>${g.n} 人</span></div>`).join('')}</div></div>`;
@@ -202,13 +209,13 @@ function renderMock(e, p) {
   const hist = D.exams.filter(x => x.mock && !x.absent).reverse();
   const names = [...new Set(hist.flatMap(x => x.subjects.map(y => y.n)))];
   const histT = hist.length < 2 ? '<p class="note">累積兩次以上模擬考後，就能看到歷次比較。</p>' :
-    `<div class="wrap"><table><tr><th>科目</th>${hist.map(x => `<th>${x.name.replace('學年度', '').replace(/\s+/g, '')}</th>`).join('')}</tr>` +
+    `<div class="wrap"><table class="hist"><tr><th>科目</th>${hist.map(x => `<th>${x.name.replace(/^\d+學年度\s*/, '')}</th>`).join('')}</tr>` +
     [['五科總分', x => x.summary && x.summary.total], ['班排名', x => x.summary && x.summary.rank], ['校排名', x => x.summary && x.summary.schoolRank]]
       .filter(([, f]) => hist.some(x => f(x) != null)).map(([t, f]) => `<tr><td><b>${t}</b></td>${hist.map(x => `<td>${f(x) == null ? '—' : f(x)}</td>`).join('')}</tr>`).join('') +
-    names.map(n => `<tr><td>${n}</td>${hist.map(x => { const y = x.subjects.find(z => z.n === n); return `<td>${y && y.s !== null ? `${y.s}${U(y)}（${y.grade}）` : '—'}</td>`; }).join('')}</tr>`).join('') + '</table></div>';
+    names.map(n => `<tr><td>${n}</td>${hist.map(x => { const y = x.subjects.find(z => z.n === n); return `<td>${y && y.s !== null ? `<div class="hg ${gcls(y.grade)}">${y.grade}</div><div>${y.s}${U(y)}</div><div class="hs">班排名 ${y.rank} / ${y.cnt}</div>${y.srank !== null ? `<div class="hs">校排名 ${y.srank}</div>` : ''}` : '—'}</td>`; }).join('')}</tr>`).join('') + '</table></div>';
   $('#out').innerHTML =
     `<div class="card lead">${e.name}：${sum}。</div>${sumCard}<div class="card"><h2 class="serif">各科成績概況</h2><div class="sgrid" style="--n:${Math.min(S.length, 5)};--m:${Math.min(S.length, 2)}">${stats}</div></div>` +
-    `<div class="card"><h2 class="serif">各科成績</h2>${table}</div>` +
+    `<div class="card"><h2 class="serif">各科成績</h2>${Sm ? `<p class="note" style="margin:-4px 0 10px">五科總分 <b>${Sm.total}</b>　班排名 <b>${Sm.rank}</b> / ${Sm.cnt}${Sm.schoolRank !== null ? `　校排名 <b>${Sm.schoolRank}</b>` : ''}</p>` : ''}${table}</div>` +
     (D2.length >= 3 ? `<div class="card"><h2 class="serif">各科班級相對位置雷達圖</h2>${radar(D2.map(x => ({n: x.n, s: x.beat, avg: 50})), '孩子（贏過同學的％）', '班級中間水準（50％）')}<p class="note">各科單位不同，所以用「贏過多少％的同學」來比較，越靠外圈代表在班上越突出。</p></div>` : '') +
     `<div class="card"><h2 class="serif">全班等級人數</h2>${bars}</div>` +
     `<div class="card"><h2 class="serif">學習狀況分析</h2>${a}</div>` +
